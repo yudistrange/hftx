@@ -20,9 +20,6 @@ config :hftx, HftxWeb.Endpoint,
   secret_key_base: "fAmPINZJN69e1+RWwkL8v4rhSyxnSTL7V5hGZkMEc/BXGqJK9dzAa3ZpHdwdlrKh",
   server: false
 
-# In test we don't send emails.
-config :hftx, Hftx.Mailer, adapter: Swoosh.Adapters.Test
-
 # Print only warnings and errors during test
 config :logger, level: :warn
 
