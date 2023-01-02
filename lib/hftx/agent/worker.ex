@@ -1,7 +1,7 @@
 defmodule Hftx.Agent.Worker do
   @behaviour :gen_statem
 
-  alias Hftx.Agent.State, as: AgentState
+  alias Hftx.Data.Agent.State, as: AgentState
 
   def start_link({name, strategy, symbol}, opts) do
     data = %AgentState{name: name, strategy: strategy, symbol: symbol}

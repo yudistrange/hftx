@@ -1,11 +1,11 @@
-defmodule Hftx.Agent.State do
+defmodule Hftx.Data.Agent.State do
   @enforce_keys [:strategy, :symbol]
   defstruct [:name, :strategy, :symbol, events: [], trades: []]
 
   @type t :: %__MODULE__{
           name: String.t(),
-          strategy: String.t(),
-          symbol: module,
+          strategy: module,
+          symbol: String.t(),
           events: [Events.t()],
           trades: [Trades.t()]
         }
