@@ -6,7 +6,7 @@ defmodule Hftx.Data.Market.Event do
           timestamp: DateTime.t(),
           last_trade_price: non_neg_integer(),
           last_trade_volume: non_neg_integer(),
-          order_book: OrderBook.t()
+          order_book: __MODULE__.OrderBook.t()
         }
 
   defmodule OrderBook do
@@ -14,8 +14,8 @@ defmodule Hftx.Data.Market.Event do
     defstruct [:bid, :offer]
 
     @type t :: %__MODULE__{
-            bid: [OrderTuple.t()],
-            offer: [OrderTuple.t()]
+            bid: [__MODULE__.OrderTuple.t()],
+            offer: [__MODULE__.OrderTuple.t()]
           }
 
     defmodule OrderTuple do

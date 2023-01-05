@@ -9,8 +9,8 @@ defmodule Hftx.Data.Agent.State do
           name: String.t(),
           strategy: module,
           symbol: String.t(),
-          events: [Events.t()],
-          trades: [Trades.t()]
+          events: [__MODULE__.Events.t()],
+          trades: [__MODULE__.Trades.t()]
         }
 
   defmodule Events do
