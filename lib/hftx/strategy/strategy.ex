@@ -1,8 +1,9 @@
-defmodule Hftx.Strategy do 
-@moduledoc """
-Describes the behaviour for a particular strategy
-"""
+defmodule Hftx.Strategy do
+  @moduledoc """
+  Describes the behaviour for a particular strategy
+  """
+  # TODO: Handle more types of aggregate structs (if/when that happens) 
+  alias Hftx.Data.Aggregate.CandleStick
 
-# TODO: Flesh out other callbacks
-@callback observe()
+  @callback observe(market_history :: [CandleStick.t()]) :: [CandleStick.t()]
 end
