@@ -1,4 +1,7 @@
 defmodule Hftx.Data.Agent.State do
+  @moduledoc """
+  Struct to represent the state of an agent worker
+  """
   @enforce_keys [:strategy, :symbol]
   defstruct [:name, :strategy, :symbol, events: [], trades: []]
 
