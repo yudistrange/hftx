@@ -4,8 +4,7 @@ defmodule Hftx.Data.Transformer do
   Compression strategies are used to aggregate the Market Price data into compact form.
   """
   alias Hftx.Data.Market.Event, as: MarketEvent
-  alias Hftx.Data.Aggregate.CandleStick
+  alias Hftx.Data.Aggregate
 
-  # TODO: Handle other aggregate structs when they are added
-  @callback update(market_event :: MarketEvent.t()) :: CandleStick.t()
+  @callback update(market_event :: MarketEvent.t()) :: Aggregate.t()
 end
