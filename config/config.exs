@@ -28,3 +28,8 @@ config :phoenix, :json_library, Jason
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
+
+config :zerodha,
+  url: System.get_env("KITE_URL") || "http://localhost:3000",
+  api_key: System.get_env("KITE__CLIENT_ID") || "api_key",
+  api_secret: System.get_env("GITHUB_CLIENT_ID") || "api_secret"
