@@ -1,5 +1,5 @@
 defmodule Hftx.Data.Market.Event do
-  @ensure_keys [:timestamp, :last_trade_price, :last_trade_volume]
+  @enforce_keys [:timestamp, :last_trade_price, :last_trade_volume]
   defstruct [:timestamp, :last_trade_price, :last_trade_volume, :order_book]
 
   @type t :: %__MODULE__{
@@ -10,7 +10,7 @@ defmodule Hftx.Data.Market.Event do
         }
 
   defmodule OrderBook do
-    @ensure_keys [:bid, :offer]
+    @enforce_keys [:bid, :offer]
     defstruct [:bid, :offer]
 
     @type t :: %__MODULE__{
@@ -19,7 +19,7 @@ defmodule Hftx.Data.Market.Event do
           }
 
     defmodule OrderTuple do
-      @ensure_keys [:volume, :price]
+      @enforce_keys [:volume, :price]
       defstruct [:volume, :price]
 
       @type t :: %__MODULE__{
