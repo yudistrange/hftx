@@ -8,9 +8,9 @@ import Config
 config :hftx, Hftx.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: System.get_env(POSTGRES_HOST) || "localhost",
+  hostname: System.get_env("POSTGRES_HOST") || "localhost",
   database: "hftx_test",
-  port: System.get_env(POSTGRES_PORT) || 25432,
+  port: System.get_env("POSTGRES_PORT") || 25432,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 
