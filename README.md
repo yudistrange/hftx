@@ -1,4 +1,5 @@
-# Hftx ![example workflow](https://github.com/yudistrange/hftx/actions/workflows/dialyzer.yaml/badge.svg)
+# Hftx ![example workflow](https://github.com/yudistrange/hftx/actions/workflows/dialyzer.yaml/badge.svg) ![example workflow](https://github.com/yudistrange/hftx/actions/workflows/test.yaml/badge.svg)
+
 
 Automated trading platform written with Elixir. It uses zerodha's kite trading APIs to track market and place orders.
 
