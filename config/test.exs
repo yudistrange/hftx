@@ -9,7 +9,8 @@ config :hftx, Hftx.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "localhost",
-  database: "hftx_test#{System.get_env("MIX_TEST_PARTITION")}",
+  database: "hftx_test",
+  port: 25432,
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: 10
 
