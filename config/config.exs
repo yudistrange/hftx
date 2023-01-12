@@ -29,7 +29,8 @@ config :phoenix, :json_library, Jason
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
 
-config :zerodha,
-  url: System.get_env("KITE_URL") || "http://localhost:3000",
-  api_key: System.get_env("KITE__CLIENT_ID") || "api_key",
-  api_secret: System.get_env("GITHUB_CLIENT_ID") || "api_secret"
+config :hftx, :zerodha,
+  api_url: System.get_env("KITE_API_URL") || "http://localhost:3000",
+  api_key: System.get_env("KITE_CLIENT_ID") || "api_key",
+  api_secret: System.get_env("GITHUB_CLIENT_ID") || "api_secret",
+  web_socket_url: System.get_env("KITE_WSS_URL") || "wss://localhost:3000"
