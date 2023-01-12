@@ -1,19 +1,23 @@
-# Hftx
+# Hftx ![example workflow](https://github.com/yudistrange/hftx/actions/workflows/dialyzer.yaml/badge.svg)
 
-To start your Phoenix server:
+Automated trading platform written with Elixir. It uses zerodha's kite trading APIs to track market and place orders.
 
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.setup`
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+## Architecture
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+## Configuration
+## Local setup
+- Install [docker](https://www.docker.com/products/docker-desktop/)
+- Install [elixir](https://elixir-lang.org/install.html) v1.12 or later
+  - [asdf](https://asdf-vm.com/) is a good tool for managing multiple versions of elixir (and other languages for that matter)
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+Once the local dependencies are met, run the following:
 
-## Learn more
+``` sh
+make run
+```
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+## Testing
+
+``` sh
+make test
+```
