@@ -1,4 +1,4 @@
-name: Dialyzer Check
+name: Dialyzer
 on: push
 
 jobs:
@@ -10,10 +10,14 @@ jobs:
         otp: ['25.2']
         elixir: ['1.14.2']
     steps:
-      - uses: actions/checkout@v2
-      - uses: erlef/setup-beam@v1
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Elixir
+        uses: erlef/setup-beam@v1
         with:
           otp-version: ${{matrix.otp}}
           elixir-version: ${{matrix.elixir}}
-      - run: mix deps.get
-      - run: mix dialyzer
+      - name: Install Hftx Deps
+        run: mix deps.get
+      - name: Run type check
+        run: mix dialyzer
