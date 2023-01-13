@@ -1,4 +1,4 @@
-defmodule Hftx.Strategy do
+defmodule Hftx.Agent.Strategy do
   @moduledoc """
   Describes the behaviour for a particular strategy
   """
