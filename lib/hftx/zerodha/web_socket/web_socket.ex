@@ -9,6 +9,13 @@ defmodule Hftx.Zerodha.WebSocket do
     WebSockex.start_link(url, __MODULE__, %{})
   end
 
+  def url(access_token) do
+    zerodha_config = Application.get_env(:hftx, :zerodha)
+    api_key = zerodha_config[:api_key]
+    web_socket_url = zerodha_config[:web_socket_url]
+    web_socket_url <> "?api_key=" <> api_key <> "&access_token=" <> access_token
+  end
+
   def handle_connect(_conn, state) do
     Logger.info("Websocket connection established!")
     {:ok, state |> Map.put(:status, :connected)}
@@ -26,10 +33,5 @@ defmodule Hftx.Zerodha.WebSocket do
 
   def terminate(close_reason, _state) do
     Logger.info("Websocket terminating with reason #{close_reason}")
-  end
-
-  def url(api_key, access_token) do
-    web_socket_url = Application.get_env(:hftx, :zerodha)[:web_socket_url]
-    web_socket_url <> "?api_key=" <> api_key <> "&access_token=" <> access_token
   end
 end
