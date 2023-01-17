@@ -20,6 +20,7 @@ defmodule Hftx.Agent.Worker do
     {:ok, :init, data}
   end
 
+  @impl true
   def handle_event(_caller, event, _state, _data) do
     IO.inspect(event, label: "Unhandled event")
     {:keep_state_and_data, []}
