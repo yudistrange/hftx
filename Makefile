@@ -10,4 +10,4 @@ test:
 	docker compose -f dev/docker-test-compose.yaml down
 
 typecheck:
-	mix dialyzer
+	mix dialyzer --force-check
