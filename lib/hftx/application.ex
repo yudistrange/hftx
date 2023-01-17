@@ -15,9 +15,9 @@ defmodule Hftx.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: Hftx.PubSub},
       # Start the Endpoint (http/https)
-      HftxWeb.Endpoint
-      # Start a worker by calling: Hftx.Worker.start_link(arg)
-      # {Hftx.Worker, arg}
+      HftxWeb.Endpoint,
+      # Start the Zerodha Supervisor
+      Hftx.Zerodha.Supervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
