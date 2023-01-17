@@ -6,14 +6,14 @@ defmodule Hftx.Zerodha.TokenStore do
 
   # TODO: Register the agent on registry
   def start_link(access_token) do
-    Agent.start_link(fn -> %{access_token: access_token} end)
+    Agent.start_link(fn -> %{access_token: access_token} end, name: __MODULE__)
   end
 
-  def get(name) do
-    Agent.get(name, &Map.get(&1, :access_token))
+  def get() do
+    Agent.get(__MODULE__, &Map.get(&1, :access_token))
   end
 
-  def update(name, token) do
-    Agent.update(name, &Map.put(&1, :access_token, token))
+  def update(token) do
+    Agent.update(__MODULE__, &Map.put(&1, :access_token, token))
   end
 end
