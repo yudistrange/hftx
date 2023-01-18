@@ -2,7 +2,7 @@ defmodule Hftx.Workers.DataTransformer do
   @moduledoc """
   Worker process that performs data aggregation using the strategies in [DataTransformer](hftx/lib/hftx/strategies/data_transfomer/data_transformer.ex)
   """
-  @behaviour GenServer
+  use GenServer
 
   @spec name({module, String.t()}) :: String.t()
   def name({aggregation_strategy, instrument_id}) do

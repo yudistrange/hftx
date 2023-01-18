@@ -5,7 +5,7 @@ defmodule Hftx.Workers.DecisionMaker do
   This process will collat the agent suggestions and make a decision based on them.
   The actual [decision strategy](hftx/lib/hftx/strategies/decision_maker/decision_maker.ex) is injected at the time of startup
   """
-  @behaviour GenServer
+  use GenServer
 
   @spec name(String.t()) :: String.t()
   def name(instrument_id) do
