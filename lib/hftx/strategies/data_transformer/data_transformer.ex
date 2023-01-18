@@ -5,7 +5,7 @@ defmodule Hftx.Strategies.DataTransformer do
   These strategies would be used for data compression - convert MarketEvent data into
   Aggregate data
   """
-  alias Hftx.Data.Market.Event, as: MarketEvent
+  alias Hftx.Data.MarketEvent
   alias Hftx.Data.Aggregate
 
   @callback transform(market_event :: [MarketEvent.t()]) ::
