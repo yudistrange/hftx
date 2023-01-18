@@ -44,7 +44,8 @@ defmodule Hftx.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:httpoison, "~> 1.8.0"},
       {:websockex, "~> 0.4.3"},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false}
+      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
+      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
     ]
   end
 
