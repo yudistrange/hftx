@@ -2,7 +2,7 @@ defmodule Hftx.Strategies.DataTransformer.CandleStickTest do
   use ExUnit.Case
 
   alias Hftx.Strategies.DataTransformer.CandleStick, as: CandleStickTransformer
-  alias Hftx.Data.Market.Event, as: MarketEvent
+  alias Hftx.Data.MarketEvent
   alias Hftx.Data.Aggregate.CandleStick
 
   test "Create CandleStick Aggregate from a list of MarketEvent Data" do

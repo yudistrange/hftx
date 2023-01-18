@@ -1,4 +1,4 @@
-defmodule Hftx.Data.Market.Event do
+defmodule Hftx.Data.MarketEvent do
   @enforce_keys [:timestamp, :last_trade_price, :last_trade_volume]
   defstruct [:timestamp, :last_trade_price, :last_trade_volume, :order_book]
 
