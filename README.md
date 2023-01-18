@@ -5,7 +5,7 @@
 
 Automated trading platform written with Elixir. It uses zerodha's kite trading APIs to track market and place orders.
 
-## Architecture
+# Architecture
 
 This diagram describes Hftx's architecture at a high level.
 
@@ -13,26 +13,81 @@ This diagram describes Hftx's architecture at a high level.
   <img src="docs/hftx.png" width="640">
 </p>
 
-### Market event ingestion
-- Ingests market event data over a websocket connection
-- Parses the binary data into [internal struct representation](lib/hftx/data/market/event.ex)
+## Project Structure
+The Hftx project contains the following components
 
-### Data aggregation
-- Collates the incoming market data into [aggregate struct](lib/hftx/data/aggregate/aggregate.ex)
+- [Zerodha Integration](lib/hftx/zerodha/)
+- [Worker Process Definitions](lib/hftx/workers/)
+- [Data Aggregation Strategies](lib/hftx/strategies/data_transformer/)
+- [Agent Strategies](lib/hftx/strategies/agent/)
+- [Decision Making Strategies](lib/hftx/strategies/decision_maker/)
+- TODO: Persistence
 
-### Agent Processes
-- Each process represents a trader running an algorithm on one market instrument
-- At any given moment there can be one or more agent processes for one market instrument
-- Each process maintains a list of past market events, that help it run the algorithm
+### Zerodha Integration
 
-### Decision Maker
-- This module accumulates the output on individual `agents`
-- Makes the final decision of buy | sell | hold based on the accumulated data
-- Calls the exchange to place the order
-- Asynchronously adds the decision to database for analytics
+#### [API](lib/hftx/zerodha/api/)
+This set of modules contains fns to communicate with Zerodha kite trade APIs.
 
-## Configuration
-## Local setup
+#### [WebSocket](lib/hftx/zerodha/web_socket/web_socket.ex)
+This module contains the implementation for a websocket process that will listen to the market events from the zerodha's websocket API
+
+The [Frame](lib/hftx/zerodha/web_socket/frame.ex) module contains fns that help operate on the binary frame sent by zerodha over websockets
+
+#### [TokenStore](lib/hftx/zerodha/token_store.ex)
+This module acts as a in-memory store for the access_token. This module would be used whenever access_token is require to call the zerodha APIs.
+
+#### [Supervisor](lib/hftx/zerodha/supervisor.ex)
+This module describes a `Supervisor` process that will initialize and supervise the zerodha related processes - [TokenStore](lib/hftx/zerodha/token_store.ex) & [WebSocket](lib/hftx/zerodha/web_socket/web_socket.ex)
+
+### Worker Process Definitions
+These modules contain the definition of worker processes for [Agent](lib/hftx/workers/agent.ex), [DataTransformer](lib/hftx/workers/data_transformer.ex) and [DecisionMaker](lib/hftx/workers/decision_maker.ex)
+
+#### [Agent](lib/hftx/workers/agent.ex)
+A `:gen_statem` process that simulates a trader as an FSM. This worker will consume aggregate market events for a market instrument and give a [suggestion](lib/hftx/data/agent/suggestion.ex) based on the active [strategy](lib/hftx/strategies/agent)
+
+These suggestions are then forwarded to the [decision maker process](lib/hftx/workers/decision_maker.ex) for that instrument
+
+In a typical run of the system, there would be multiple agents running for every market instrument under watch. And each of these agent would be implementing a different strategy to evaluate the market events
+
+#### [DataTransformer](lib/hftx/workers/data_transformer.ex)
+A `GenServer` process that transformer the incoming stream of market event into an aggregate data. This process is initialized with a [strategy](lib/hftx/strategies/data_transformer), which determines how the market event stream is converted into an aggregate data struct
+
+The aggregate data structs are then forwarded to all the [agent worker processes](lib/hftx/workers/agent.ex) for that instrument
+
+There would be one `data_transformer` working on one market instrument
+
+#### [DecisionMaker](lib/hftx/workers/decision_maker.ex)
+A `GenServer` process that consumes the suggestions from various agents and takes the final action based on the suggestions. This process is initialized with a [decision making strategies](lib/hftx/strategies/decision_maker)
+
+### Data Aggregation Strategies
+These are set of modules that specify data transformation strategies. The base behaviour can be found [here](lib/hftx/strategies/data_transformer/data_transformer.ex)
+
+Operating on a raw stream on market events maybe too computationally intensive. The raison d'etre for these modules is to convert the incoming market event data stream into an [aggreagte](lib/hftx/data/aggregate/aggregate.ex) form. The intent is to create an aggregate data struct, which conveys more or less the same information as the raw market event data stream that it represents. The [AgentWorker](lib/hftx/workers/agent.ex) can then operate on the aggregate rather than the original stream.
+
+An example `data transformer strategy` can be found [here](lib/hftx/strategies/data_transformer/candle_stick.ex). This strategy converts a list of market event data into [CandleStick](lib/hftx/data/aggregate/candle_stick.ex) data struct
+
+### Agent Strategies
+These are set of modules that specify the strategies which can be injected in the agent worker processes.
+
+These strategies take a list of aggregate market data event and respond back with a suggestion. The base behaviour for this strategy can be found [here](lib/hftx/strategies/agent/agent.ex)
+
+An example `agent worker strategy` can be found [here](lib/hftx/strategies/agent/always_long.ex). This is a dummy strategy that always suggests going `:long` on the instrument
+
+### Decision Making Strategies
+These are set of modules that specify the decision making strategies. The base behaviour can be found [here](lib/hftx/strategies/decision_maker/decision_maker.ex)
+
+These strategies define the algorithm to consume the [suggestions](lib/hftx/data/agent/suggestion.ex) generated by the agent worker processes and take the final decision on them.
+
+And example `decision maker strategy` can be found [here](lib/hftx/strategies/decision_maker/naive.ex). This is a dummy strategy which just picks the latest suggestion by the agents.
+
+### Persistence
+*TODO*
+
+This module doesn't exist yet, when it does it will help persist the orders, the decisions and the circumstances underwhich those decisions were taken.
+
+# Configuration
+
+# Local setup
 - Install [docker](https://www.docker.com/products/docker-desktop/)
 - Install [elixir](https://elixir-lang.org/install.html) v1.12 or later
   - [asdf](https://asdf-vm.com/) is a good tool for managing multiple versions of elixir (and other languages for that matter)
@@ -43,7 +98,7 @@ Once the local dependencies are met, run the following:
 make run
 ```
 
-## Testing
+# Testing
 ``` sh
 make test
 ```
