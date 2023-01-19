@@ -7,15 +7,15 @@ defmodule Hftx.Workers.DecisionMaker do
   """
   use GenServer
 
-  @spec name(String.t()) :: atom()
-  def name(instrument_id) do
-    ("DecisionMaker." <> instrument_id) |> String.to_atom()
-  end
+  @spec name(String.t()) :: String.t()
+  def name(instrument_id), do: "DecisionMaker." <> instrument_id
 
   @spec start_link(String.t(), {module}) ::
           :ignore | {:error, any} | {:ok, pid}
   def start_link(instrument_id, {decision_strategy}) do
-    GenServer.start_link(__MODULE__, {decision_strategy, instrument_id}, name: name(instrument_id))
+    GenServer.start_link(__MODULE__, {decision_strategy, instrument_id},
+      name: {:via, :swarm, name(instrument_id) <> (decision_strategy |> Atom.to_string())}
+    )
   end
 
   @impl true
@@ -26,7 +26,13 @@ defmodule Hftx.Workers.DecisionMaker do
        instrument_id: instrument_id,
        past_suggestions: [],
        past_actions: []
-     }}
+     }, {:continue, :register}}
+  end
+
+  @impl true
+  def handle_continue(:register, state) do
+    state |> Map.get(:instrument_id) |> name() |> Swarm.join(self())
+    {:noreply, state}
   end
 
   @impl true
