@@ -60,12 +60,8 @@ defmodule Hftx.Workers.DataTransformer do
     end
   end
 
-  defp aggregate({module, func, args}, _instrument_id) do
+  defp aggregate({module, func, args}, instrument_id) do
     agg = apply(module, func, args)
-
-    # TODO:
-    # - Dispatch the aggregate to workers based on instrument_id
-
-    agg
+    :ok = Agent.observe(instrument_id, agg)
   end
 end
