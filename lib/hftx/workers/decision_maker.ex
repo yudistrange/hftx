@@ -6,9 +6,17 @@ defmodule Hftx.Workers.DecisionMaker do
   The actual [decision strategy](hftx/lib/hftx/strategies/decision_maker/decision_maker.ex) is injected at the time of startup
   """
   use GenServer
+  alias Hftx.Data.Agent.Suggestion, as: AgentSuggestion
 
   @spec name(String.t()) :: String.t()
   def name(instrument_id), do: "DecisionMaker." <> instrument_id
+
+  @spec observe(String.t(), {module, AgentSuggestion.t(), non_neg_integer()}) :: :ok
+  def observe(instrument_id, {agent_strategy, agent_suggestion, agent_count}) do
+    instrument_id
+    |> name()
+    |> Swarm.send({:observe, {agent_strategy, agent_suggestion}, agent_count})
+  end
 
   @spec start_link(String.t(), {module}) ::
           :ignore | {:error, any} | {:ok, pid}
@@ -37,7 +45,7 @@ defmodule Hftx.Workers.DecisionMaker do
 
   @impl true
   def handle_cast(
-        {:observe, suggestion},
+        {:observe, agent_count, suggestion},
         %{
           decision_strategy: strategy,
           past_suggestions: past_suggestions,
@@ -45,9 +53,6 @@ defmodule Hftx.Workers.DecisionMaker do
           instrument_id: instrument_id
         } = state
       ) do
-    # TODO: Pick this count from the worker process registry
-    agent_count = 10
-
     if Enum.count(past_suggestions) >= agent_count do
       decision = decide({strategy, :transform, [suggestion | past_suggestions]}, instrument_id)
       {:noreply, state |> Map.put(:past_actions, [decision | past_actions])}
