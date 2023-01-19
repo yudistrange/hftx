@@ -6,7 +6,9 @@ defmodule Hftx.Workers.Agent do
   @behaviour :gen_statem
 
   require Logger
+  alias Hftx.Workers.DecisionMaker
   alias Hftx.Data.Agent.State, as: AgentState
+  alias Hftx.Data.Aggregate
 
   @spec group_name(String.t()) :: String.t()
   def group_name(instrument_id) do
@@ -16,6 +18,11 @@ defmodule Hftx.Workers.Agent do
   @spec name({module, String.t()}) :: String.t()
   def name({strategy, instrument_id}) do
     "Agent." <> (strategy |> Atom.to_string()) <> "." <> instrument_id
+  end
+
+  @spec observe(String.t(), Aggregate.t()) :: :ok
+  def observe(instrument_id, event) do
+    instrument_id |> group_name() |> Swarm.publish({:observe, event})
   end
 
   @spec start_link(String.t(), {module, String.t()}) :: :ignore | {:error, any} | {:ok, pid}
