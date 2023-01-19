@@ -8,5 +8,7 @@ defmodule Hftx.Strategies.Agent do
   @doc """
   Process a list of market event aggregates and suggest a response
   """
-  @callback evaluate(market_history :: [Aggregate.t()]) :: AgentSuggestion.t()
+  @callback historical_event_window() :: non_neg_integer()
+  @callback evaluate(previous_suggestion :: AgentSuggestion, market_history :: [Aggregate.t()]) ::
+              {AgentSuggestion.t(), [Aggregate.t()]}
 end
