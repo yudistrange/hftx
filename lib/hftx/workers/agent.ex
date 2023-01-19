@@ -24,15 +24,16 @@ defmodule Hftx.Workers.Agent do
     :gen_statem.cast(symbol, {:observe, event})
   end
 
-  def start_link({name, strategy, symbol, instrument_id}, opts) do
+  @spec start_link(String.t(), {module, String.t()}) :: :ignore | {:error, any} | {:ok, pid}
+  def start_link(instrument_id, {strategy, symbol}) do
     data = %AgentState{
-      name: name,
+      name: name({strategy, symbol}),
       strategy: strategy,
       symbol: symbol,
       instrument_id: instrument_id
     }
 
-    :gen_statem.start_link(__MODULE__, data, opts)
+    :gen_statem.start_link(__MODULE__, data, [])
   end
 
   @impl true
