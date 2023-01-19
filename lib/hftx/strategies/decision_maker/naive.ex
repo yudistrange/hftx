@@ -7,7 +7,7 @@ defmodule Hftx.Strategies.DecisionMaker.Naive do
   @behaviour Hftx.Strategies.DecisionMaker
 
   @impl true
-  def decide([suggestion | _rest]) do
+  def decide([{_agent_strategy, suggestion} | _rest]) do
     suggestion
   end
 end

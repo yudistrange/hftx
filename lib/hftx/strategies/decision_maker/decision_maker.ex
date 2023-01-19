@@ -4,5 +4,5 @@ defmodule Hftx.Strategies.DecisionMaker do
   """
   alias Hftx.Data.Agent.Suggestion, as: AgentSuggestion
 
-  @callback decide(suggestions :: [AgentSuggestion.t()]) :: AgentSuggestion.t()
+  @callback decide(suggestions :: [{module, AgentSuggestion.t()}]) :: AgentSuggestion.t()
 end
