@@ -4,22 +4,23 @@ defmodule Hftx.Workers.DataTransformer do
   """
   use GenServer
 
-  @spec name({module, String.t()}) :: String.t()
-  def name({aggregation_strategy, instrument_id}) do
-    "DataTransformer-" <> (aggregation_strategy |> Atom.to_string()) <> "-" <> instrument_id
+  @spec name(String.t()) :: atom()
+  def name(instrument_id) do
+    ("DataTransformer." <> instrument_id) |> String.to_atom()
   end
 
-  @spec start_link({non_neg_integer(), module, String.t()}) ::
+  @spec start_link(String.t(), {module}) ::
           :ignore | {:error, any} | {:ok, pid}
-  def start_link({aggregation_window, aggregation_strategy, instrument_id}) do
-    GenServer.start_link(__MODULE__, {aggregation_window, aggregation_strategy, instrument_id})
+  def start_link(instrument_id, {aggregation_strategy}) do
+    GenServer.start_link(__MODULE__, {aggregation_strategy, instrument_id},
+      name: name(instrument_id)
+    )
   end
 
   @impl true
-  def init({aggregation_window, aggregation_strategy, instrument_id}) do
+  def init({aggregation_strategy, instrument_id}) do
     {:ok,
      %{
-       aggregation_window: aggregation_window,
        market_events: [],
        aggregation_strategy: aggregation_strategy,
        instrument_id: instrument_id
@@ -31,11 +32,12 @@ defmodule Hftx.Workers.DataTransformer do
         {:observe, market_event},
         %{
           market_events: market_events,
-          aggregation_window: aggregation_window,
           aggregation_strategy: aggregation_strategy,
           instrument_id: instrument_id
         } = state
       ) do
+    aggregation_window = apply(aggregation_strategy, :aggregation_size, [])
+
     if Enum.count(market_events) + 1 >= aggregation_window do
       aggregate({aggregation_strategy, :transform, [market_event | market_events]}, instrument_id)
       {:noreply, state |> Map.put(:market_events, [])}
