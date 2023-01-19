@@ -4,6 +4,9 @@ defmodule Hftx.Workers.DataTransformer do
   """
   use GenServer
 
+  alias Hftx.Workers.Agent
+  alias Hftx.Data.MarketEvent
+
   @spec name(String.t()) :: String.t()
   def name(instrument_id) do
     "DataTransformer." <> instrument_id
@@ -15,6 +18,11 @@ defmodule Hftx.Workers.DataTransformer do
     GenServer.start_link(__MODULE__, {aggregation_strategy, instrument_id},
       name: {:via, :swarm, name(instrument_id) <> (aggregation_strategy |> Atom.to_string())}
     )
+  end
+
+  @spec observe(String.t(), MarketEvent.t()) :: :ok
+  def observe(instrument_id, market_event) do
+    instrument_id |> name() |> Swarm.send({:observe, market_event})
   end
 
   @impl true
