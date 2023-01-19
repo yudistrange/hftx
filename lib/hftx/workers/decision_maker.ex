@@ -7,24 +7,23 @@ defmodule Hftx.Workers.DecisionMaker do
   """
   use GenServer
 
-  @spec name(String.t()) :: String.t()
+  @spec name(String.t()) :: atom()
   def name(instrument_id) do
-    "DecisionMaker-" <> instrument_id
+    ("DecisionMaker." <> instrument_id) |> String.to_atom()
   end
 
-  @spec start_link({module, non_neg_integer(), String.t()}) ::
+  @spec start_link(String.t(), {module}) ::
           :ignore | {:error, any} | {:ok, pid}
-  def start_link({decision_strategy, agent_count, instrument_id}) do
-    GenServer.start_link(__MODULE__, {decision_strategy, agent_count, instrument_id})
+  def start_link(instrument_id, {decision_strategy}) do
+    GenServer.start_link(__MODULE__, {decision_strategy, instrument_id}, name: name(instrument_id))
   end
 
   @impl true
-  def init({decision_strategy, agent_count, instrument_id}) do
+  def init({decision_strategy, instrument_id}) do
     {:ok,
      %{
        decision_strategy: decision_strategy,
        instrument_id: instrument_id,
-       agent_count: agent_count,
        past_suggestions: [],
        past_actions: []
      }}
@@ -37,10 +36,12 @@ defmodule Hftx.Workers.DecisionMaker do
           decision_strategy: strategy,
           past_suggestions: past_suggestions,
           past_actions: past_actions,
-          agent_count: agent_count,
           instrument_id: instrument_id
         } = state
       ) do
+    # TODO: Pick this count from the worker process registry
+    agent_count = 10
+
     if Enum.count(past_suggestions) >= agent_count do
       decision = decide({strategy, :transform, [suggestion | past_suggestions]}, instrument_id)
       {:noreply, state |> Map.put(:past_actions, [decision | past_actions])}
