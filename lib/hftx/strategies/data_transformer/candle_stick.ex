@@ -9,6 +9,9 @@ defmodule Hftx.Strategies.DataTransformer.CandleStick do
   alias Hftx.Data.Aggregate.CandleStick
 
   @impl true
+  def aggregation_size(), do: 10
+
+  @impl true
   def transform(market_events) do
     close_price = List.first(market_events) |> Map.get(:last_trade_price)
     open_price = List.last(market_events) |> Map.get(:last_trade_price)
