@@ -52,9 +52,11 @@ defmodule Hftx.Workers.Agent do
         _sender,
         {:observe, event},
         state,
-        %{strategy: strategy, events: events} = data
+        %{instrument_id: instrument_id, strategy: strategy, events: events} = data
       ) do
+    active_agent_count = instrument_id |> group_name() |> Swarm.members() |> Enum.count()
     {next_state, updated_event_list} = apply(strategy, :evaluate, [state, [event | events]])
+    :ok = DecisionMaker.observe(instrument_id, {next_state, strategy, active_agent_count})
 
     cond do
       next_state == state ->
