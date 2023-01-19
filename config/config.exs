@@ -34,3 +34,10 @@ config :hftx, :zerodha,
   api_key: System.get_env("KITE_CLIENT_ID") || "api_key",
   api_secret: System.get_env("GITHUB_CLIENT_ID") || "api_secret",
   web_socket_url: System.get_env("KITE_WSS_URL") || "wss://localhost:3000"
+
+config :hftx, :instruments,
+  tsla: [
+    decision_maker_strategy: Hftx.Strategies.DecisionMaker.Naive,
+    data_transformer_strategy: Hftx.Strategies.DataTransformer.CandleStick,
+    agent_strategies: [Hftx.Strategies.Agent.AlwaysLong]
+  ]
