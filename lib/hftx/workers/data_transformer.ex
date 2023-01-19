@@ -4,16 +4,16 @@ defmodule Hftx.Workers.DataTransformer do
   """
   use GenServer
 
-  @spec name(String.t()) :: atom()
+  @spec name(String.t()) :: String.t()
   def name(instrument_id) do
-    ("DataTransformer." <> instrument_id) |> String.to_atom()
+    "DataTransformer." <> instrument_id
   end
 
   @spec start_link(String.t(), {module}) ::
           :ignore | {:error, any} | {:ok, pid}
   def start_link(instrument_id, {aggregation_strategy}) do
     GenServer.start_link(__MODULE__, {aggregation_strategy, instrument_id},
-      name: name(instrument_id)
+      name: {:via, :swarm, name(instrument_id) <> (aggregation_strategy |> Atom.to_string())}
     )
   end
 
@@ -24,7 +24,13 @@ defmodule Hftx.Workers.DataTransformer do
        market_events: [],
        aggregation_strategy: aggregation_strategy,
        instrument_id: instrument_id
-     }}
+     }, {:continue, :register}}
+  end
+
+  @impl true
+  def handle_continue(:register, state) do
+    state |> Map.get(:instrument_id) |> name() |> Swarm.join(self())
+    {:noreply, state}
   end
 
   @impl true
