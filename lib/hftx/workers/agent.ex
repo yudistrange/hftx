@@ -5,23 +5,17 @@ defmodule Hftx.Workers.Agent do
   """
   @behaviour :gen_statem
 
+  require Logger
   alias Hftx.Data.Agent.State, as: AgentState
-  alias Hftx.Data.Aggregate
 
   @spec group_name(String.t()) :: String.t()
-  def group_name(symbol) do
-    "AgentGroup-" <> symbol
+  def group_name(instrument_id) do
+    "AgentGroup." <> instrument_id
   end
 
   @spec name({module, String.t()}) :: String.t()
-  def name({strategy, symbol}) do
-    "Agent-" <> (strategy |> Atom.to_string()) <> "-" <> symbol
-  end
-
-  @spec observe({module, Aggregate.t()}) :: :ok
-  def observe({symbol, event}) do
-    # TODO: Get Pids from
-    :gen_statem.cast(symbol, {:observe, event})
+  def name({strategy, instrument_id}) do
+    "Agent." <> (strategy |> Atom.to_string()) <> "." <> instrument_id
   end
 
   @spec start_link(String.t(), {module, String.t()}) :: :ignore | {:error, any} | {:ok, pid}
@@ -30,22 +24,43 @@ defmodule Hftx.Workers.Agent do
       name: name({strategy, symbol}),
       strategy: strategy,
       symbol: symbol,
-      instrument_id: instrument_id
+      instrument_id: instrument_id,
+      events: []
     }
 
-    :gen_statem.start_link(__MODULE__, data, [])
+    :gen_statem.start_link({:via, :swarm, name({strategy, instrument_id})}, __MODULE__, data, [])
   end
 
   @impl true
   def callback_mode(), do: :handle_event_function
 
   @impl true
-  def init(data) do
+  def init(%{instrument_id: instrument_id} = data) do
+    instrument_id |> group_name() |> Swarm.join(self())
     {:ok, :init, data}
   end
 
   @impl true
-  def handle_event(_caller, _event, _state, _data) do
+  def handle_event(
+        _sender,
+        {:observe, event},
+        state,
+        %{strategy: strategy, events: events} = data
+      ) do
+    {next_state, updated_event_list} = apply(strategy, :evaluate, [state, [event | events]])
+
+    cond do
+      next_state == state ->
+        {:keep_state, data |> Map.put(:events, updated_event_list)}
+
+      next_state != state ->
+        {:next_state, next_state, data |> Map.put(:events, updated_event_list)}
+    end
+  end
+
+  @impl true
+  def handle_event(_sender, event, _state, %{name: name}) do
+    Logger.error("Received unhandled event in #{name} agent: #{event}")
     {:keep_state_and_data, []}
   end
 end
