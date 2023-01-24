@@ -7,7 +7,13 @@ defmodule Hftx.Strategies.DataTransformer.CandleStickTest do
 
   test "Create CandleStick Aggregate from a list of MarketEvent Data" do
     market_events = [
-      %MarketEvent{timestamp: DateTime.utc_now(), last_trade_price: 100, last_trade_volume: 1}
+      %MarketEvent{
+        timestamp: DateTime.utc_now(),
+        symbol: "tsla",
+        instrument_token: 1,
+        last_trade_price: 100,
+        last_trade_volume: 1
+      }
     ]
 
     assert CandleStickTransformer.transform(market_events) == %CandleStick{
