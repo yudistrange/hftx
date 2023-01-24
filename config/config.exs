@@ -25,19 +25,21 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-# Import environment specific config. This must remain at the bottom
-# of this file so it overrides the configuration defined above.
-import_config "#{config_env()}.exs"
-
+# Configures the zerodha endpoints, api keys, api secrets and urls
 config :hftx, :zerodha,
   api_url: System.get_env("KITE_API_URL") || "http://localhost:3000",
   api_key: System.get_env("KITE_CLIENT_ID") || "api_key",
   api_secret: System.get_env("GITHUB_CLIENT_ID") || "api_secret",
   web_socket_url: System.get_env("KITE_WSS_URL") || "wss://localhost:3000"
 
-config :hftx, :instruments,
-  tsla: [
-    decision_maker_strategy: Hftx.Strategies.DecisionMaker.Naive,
-    data_transformer_strategy: Hftx.Strategies.DataTransformer.CandleStick,
-    agent_strategies: [Hftx.Strategies.Agent.AlwaysLong]
-  ]
+# Example instrument configuration
+# config :hftx, :instruments,
+#   tsla: [
+#     decision_maker_strategy: Hftx.Strategies.DecisionMaker.Naive,
+#     data_transformer_strategy: Hftx.Strategies.DataTransformer.CandleStick,
+#     agent_strategies: [Hftx.Strategies.Agent.AlwaysLong]
+# ]
+
+# Import environment specific config. This must remain at the bottom
+# of this file so it overrides the configuration defined above.
+import_config "#{config_env()}.exs"

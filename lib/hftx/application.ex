@@ -22,6 +22,16 @@ defmodule Hftx.Application do
       Hftx.InstrumentsSupervisor
     ]
 
+    children =
+      if Mix.env() |> Atom.to_string() == "backtest" do
+        [
+          %{id: Backtester, start: {Hftx.Backtesting, :run, [nil]}, restart: :transient}
+          | children
+        ]
+      else
+        children
+      end
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Hftx.Supervisor]
