@@ -5,6 +5,8 @@ defmodule Hftx.Zerodha.WebSocket do
   use WebSockex
   require Logger
 
+  alias Hftx.Zerodha.WebSocket.Frame
+
   def start_link(url) do
     WebSockex.start_link(url, __MODULE__, %{})
   end
@@ -23,6 +25,14 @@ defmodule Hftx.Zerodha.WebSocket do
 
   def handle_frame({type, msg}, state) do
     Logger.debug("Received Message - Type: #{inspect(type)} -- Message: #{inspect(msg)}")
+
+    case Frame.parse(msg) do
+      :heartbeat -> nil
+      {:user_event, _msg} -> nil
+      {:market_event, _event} -> nil
+      {:error, :parse_error} -> nil
+    end
+
     {:ok, state}
   end
 

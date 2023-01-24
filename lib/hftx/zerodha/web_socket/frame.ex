@@ -4,13 +4,14 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
   various messages received over the websocket frames from zerodha
   """
   require Logger
-  alias Hftx.Zerodha.WebSocket.Frame.Parse
+  alias Hftx.Data.MarketEvent
+  alias Hftx.Zerodha.WebSocket.Frame.MarketEventParser
 
   @type heartbeat :: :heartbeat
   @type user_event :: {:user_event, term()}
-  @type market_event :: {:market_event, struct()}
 
-  @spec parse(bitstring) :: heartbeat | market_event | user_event | {:error, :parse_error}
+  @spec parse(bitstring) ::
+          heartbeat | {:market_event, [MarketEvent.t()]} | user_event | {:error, :parse_error}
   def parse(frame) do
     {json_parse_status, json_parse_result} = Jason.decode(frame)
 
@@ -31,20 +32,25 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
     {:user_event, parsed_json_frame}
   end
 
-  @spec market_event(bitstring) :: market_event | {:error, :parse_error}
+  @spec market_event(bitstring) :: {:market_event, [MarketEvent.t()]} | {:error, :parse_error}
   defp market_event(binary_packet) do
     message_size = bit_size(binary_packet) / 8
     Logger.debug("Message size #{message_size}")
 
-    if message_size == Parse.ltp_message_size() + Parse.num_frame_size() do
-      {:market_event, Parse.parse(binary_packet)}
+    if message_size == MarketEventParser.ltp_message_size() + MarketEventParser.num_frame_size() do
+      {:market_event, MarketEventParser.parse(binary_packet)}
+
+      case MarketEventParser.parse(binary_packet) do
+        {:ok, market_events} -> {:market_event, market_events}
+        {:error, :parse_error} -> {:error, :parse_error}
+      end
     else
-      Logger.error("Expected frame size: #{Parse.ltp_message_size()}")
+      Logger.error("Expected frame size: #{MarketEventParser.ltp_message_size()}")
       {:error, :parse_error}
     end
   end
 
-  defmodule Parse do
+  defmodule MarketEventParser do
     @moduledoc """
     Helper module which describes the decoding of Zerodha's binary message
     All calculations here are based on bytes
@@ -52,6 +58,7 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
     WARNING: This module only supports `ltp` mode messages
     """
     require Logger
+    alias Hftx.Data.MarketEvent
 
     @number_of_frame 2
     @frame_size 2
@@ -68,14 +75,22 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
     def index_quote_packet_size, do: @index_quote_packet_size + @frame_size
     def index_full_packet_size, do: @index_full_packet_size + @frame_size
 
-    @spec parse(binary) :: [map()]
+    @spec parse(binary) :: {:ok, [MarketEvent.t()]} | {:error, :parse_error}
     def parse(binary_packet) do
-      num_packets = get_number_of_packets(binary_packet)
+      try do
+        num_packets = get_number_of_packets(binary_packet)
 
-      packets =
-        binary_part(binary_packet, @number_of_frame, byte_size(binary_packet) - @number_of_frame)
+        packets =
+          binary_part(
+            binary_packet,
+            @number_of_frame,
+            byte_size(binary_packet) - @number_of_frame
+          )
 
-      parse_binary_packets(packets, num_packets - 1)
+        {:ok, parse_binary_packets(packets, num_packets - 1)}
+      rescue
+        _ -> {:error, :parse_error}
+      end
     end
 
     defp get_number_of_packets(binary_packet) do
@@ -84,7 +99,7 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
       |> :binary.decode_unsigned()
     end
 
-    @spec parse_binary_packets(binary, non_neg_integer()) :: [map() | nil]
+    @spec parse_binary_packets(binary, non_neg_integer()) :: [MarketEvent.t()]
     defp parse_binary_packets(binary_packet, num_packets) do
       frame_size = binary_packet |> binary_part(0, @frame_size) |> :binary.decode_unsigned()
       this_packet = binary_part(binary_packet, @frame_size, frame_size)
@@ -105,18 +120,24 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
       end
     end
 
-    @spec parse_packet(binary, non_neg_integer()) :: map() | nil
+    @spec parse_packet(binary(), non_neg_integer()) :: MarketEvent.t()
     defp parse_packet(packet, @ltp_packet_size) do
       instrument_token = packet |> binary_part(0, 4) |> :binary.decode_unsigned()
       ltp = packet |> binary_part(4, 4) |> :binary.decode_unsigned()
 
-      %{instrument_token: instrument_token, ltp: ltp}
+      %MarketEvent{
+        timestamp: DateTime.utc_now() |> DateTime.to_unix(),
+        last_trade_price: ltp,
+        instrument_token: instrument_token
+      }
     end
 
     defp parse_packet(packet, size) do
       Logger.error(
         "Received packet with unsupported size: #{size}\nPacket: #{IO.inspect(packet)}"
       )
+
+      raise "Received Packet with unsupported size"
     end
   end
 end

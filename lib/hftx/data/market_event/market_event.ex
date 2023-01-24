@@ -1,12 +1,19 @@
 defmodule Hftx.Data.MarketEvent do
   @enforce_keys [:timestamp, :last_trade_price]
-  defstruct [:timestamp, :last_trade_price, :last_trade_volume, :order_book]
+  defstruct [
+    :timestamp,
+    :last_trade_price,
+    :instrument_token,
+    :last_trade_volume,
+    :order_book
+  ]
 
   @type t :: %__MODULE__{
-          timestamp: DateTime.t(),
+          timestamp: integer(),
           last_trade_price: non_neg_integer(),
-          last_trade_volume: non_neg_integer(),
-          order_book: __MODULE__.OrderBook.t()
+          instrument_token: non_neg_integer(),
+          last_trade_volume: non_neg_integer() | nil,
+          order_book: __MODULE__.OrderBook.t() | nil
         }
 
   defmodule OrderBook do

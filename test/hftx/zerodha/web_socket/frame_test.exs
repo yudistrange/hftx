@@ -21,6 +21,11 @@ defmodule Hftx.Zerodha.WebSocket.FrameTest do
     ltp = 100
 
     msg = <<num_packet::16, packet_size::16, instrument_token::32, ltp::32>>
-    assert Frame.parse(msg) === {:market_event, [%{instrument_token: instrument_token, ltp: ltp}]}
+    {:market_event, [parsed_msg]} = Frame.parse(msg)
+
+    assert parsed_msg |> Map.get(:instrument_token) === 111_111
+    assert parsed_msg |> Map.get(:last_trade_price) === 100
+    assert parsed_msg |> Map.get(:last_trade_volume) === nil
+    assert parsed_msg |> Map.get(:order_book) === nil
   end
 end
