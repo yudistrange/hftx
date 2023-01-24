@@ -22,8 +22,10 @@ defmodule Hftx.Application do
       Hftx.InstrumentsSupervisor
     ]
 
+    backtest_enabled = Application.get_env(:hftx, :backtest)[:enabled] || false
+
     children =
-      if Mix.env() |> Atom.to_string() == "backtest" do
+      if backtest_enabled do
         [
           %{id: Backtester, start: {Hftx.Backtesting, :run, [nil]}, restart: :transient}
           | children

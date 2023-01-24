@@ -27,8 +27,9 @@ config :logger, level: :info
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
-config :hftx,
-  backtest_data_file: "priv/backtest_data.csv"
+config :hftx, :backtest,
+  enabled: true,
+  data_file: "priv/backtest_data.csv"
 
 config :hftx, :zerodha,
   api_url: System.get_env("KITE_API_URL") || "http://localhost:4002",

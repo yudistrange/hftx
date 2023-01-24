@@ -9,7 +9,7 @@ defmodule Hftx.Backtesting.Runner do
 
   def run({symbol, instrument_token}) do
     Logger.info("Starting the backtester process")
-    backtest_data = Application.get_env(:hftx, :backtest_data_file)
+    backtest_data = Application.get_env(:hftx, :backtest)[:data_file]
 
     File.stream!(backtest_data)
     # Drop the CSV Headers

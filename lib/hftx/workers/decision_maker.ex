@@ -71,7 +71,7 @@ defmodule Hftx.Workers.DecisionMaker do
   defp decide({module, func, args}, instrument_id) do
     decision = apply(module, func, [args])
 
-    if Mix.env() |> Atom.to_string() == "backtest" do
+    if Application.get_env(:hftx, :backtest)[:enabled] || false do
       current_price = PriceTracker.current_price(instrument_id)
       OrderHistory.place_order(instrument_id, {decision, current_price})
     end
