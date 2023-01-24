@@ -26,7 +26,7 @@ defmodule Hftx.Workers.DataTransformer do
 
   @spec observe(String.t(), MarketEvent.t()) :: :ok
   def observe(instrument_id, market_event) do
-    instrument_id |> name() |> Swarm.send({:observe, market_event})
+    instrument_id |> name() |> Swarm.publish({:observe, market_event})
   end
 
   @impl true
@@ -46,7 +46,7 @@ defmodule Hftx.Workers.DataTransformer do
   end
 
   @impl true
-  def handle_cast(
+  def handle_info(
         {:observe, market_event},
         %{
           market_events: market_events,
@@ -67,7 +67,7 @@ defmodule Hftx.Workers.DataTransformer do
   end
 
   defp aggregate({module, func, args}, instrument_id) do
-    agg = apply(module, func, args)
+    agg = apply(module, func, [args])
     Logger.debug("Brodcasting the aggregate to Agents:")
     Logger.debug(inspect(agg))
     :ok = Agent.observe(instrument_id, agg)
