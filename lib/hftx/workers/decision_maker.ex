@@ -16,7 +16,7 @@ defmodule Hftx.Workers.DecisionMaker do
   def observe(instrument_id, {agent_strategy, agent_suggestion, agent_count}) do
     instrument_id
     |> name()
-    |> Swarm.send({:observe, {agent_strategy, agent_suggestion}, agent_count})
+    |> Swarm.publish({:observe, {agent_strategy, agent_suggestion}, agent_count})
   end
 
   @spec start_link(String.t(), {module}) ::
@@ -47,8 +47,8 @@ defmodule Hftx.Workers.DecisionMaker do
   end
 
   @impl true
-  def handle_cast(
-        {:observe, agent_count, suggestion},
+  def handle_info(
+        {:observe, {_agent_strategy, _agent_suggestion} = suggestion, agent_count},
         %{
           decision_strategy: strategy,
           past_suggestions: past_suggestions,
@@ -58,15 +58,15 @@ defmodule Hftx.Workers.DecisionMaker do
       ) do
     Logger.debug("Received suggestion: ")
     if Enum.count(past_suggestions) >= agent_count do
-      decision = decide({strategy, :transform, [suggestion | past_suggestions]}, instrument_id)
+      decision = decide({strategy, :decide, [suggestion | past_suggestions]}, instrument_id)
       {:noreply, state |> Map.put(:past_actions, [decision | past_actions])}
     else
       {:noreply, state |> Map.put(:past_suggestions, [suggestion | past_suggestions])}
     end
   end
 
-  defp decide({module, func, args}, _instrument_id) do
-    decision = apply(module, func, args)
+  defp decide({module, func, args}, instrument_id) do
+    decision = apply(module, func, [args])
 
     # TODO:
     # - Place the order according to decision

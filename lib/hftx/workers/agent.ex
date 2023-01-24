@@ -60,7 +60,7 @@ defmodule Hftx.Workers.Agent do
     Logger.debug(inspect(event))
     active_agent_count = instrument_id |> group_name() |> Swarm.members() |> Enum.count()
     {next_state, updated_event_list} = apply(strategy, :evaluate, [state, [event | events]])
-    :ok = DecisionMaker.observe(instrument_id, {next_state, strategy, active_agent_count})
+    :ok = DecisionMaker.observe(instrument_id, {strategy, next_state, active_agent_count})
 
     cond do
       next_state == state ->
