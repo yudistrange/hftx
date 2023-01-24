@@ -128,7 +128,9 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
       %MarketEvent{
         timestamp: DateTime.utc_now() |> DateTime.to_unix(),
         last_trade_price: ltp,
-        instrument_token: instrument_token
+        instrument_token: instrument_token,
+        # TODO: Fetch from the zerodha's intrument to symbol list
+        symbol: "bajfinance"
       }
     end
 
