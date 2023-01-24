@@ -11,3 +11,11 @@ test:
 
 typecheck:
 	mix dialyzer --force-check
+
+analyze:
+	mix credo
+
+backtest: export MIX_ENV = backtest
+backtest:
+	echo "Launching Shell for backtesting"
+	iex -S mix

@@ -7,6 +7,8 @@ defmodule Hftx.Workers.DecisionMaker do
   """
   use GenServer
   require Logger
+  alias Hftx.Backtesting.PriceTracker
+  alias Hftx.Backtesting.OrderHistory
   alias Hftx.Data.Agent.Suggestion, as: AgentSuggestion
 
   @spec name(String.t()) :: String.t()
@@ -56,7 +58,8 @@ defmodule Hftx.Workers.DecisionMaker do
           instrument_id: instrument_id
         } = state
       ) do
-    Logger.debug("Received suggestion: ")
+    Logger.debug("Received suggestion")
+
     if Enum.count(past_suggestions) >= agent_count do
       decision = decide({strategy, :decide, [suggestion | past_suggestions]}, instrument_id)
       {:noreply, state |> Map.put(:past_actions, [decision | past_actions])}
@@ -68,10 +71,14 @@ defmodule Hftx.Workers.DecisionMaker do
   defp decide({module, func, args}, instrument_id) do
     decision = apply(module, func, [args])
 
+    if Mix.env() |> Atom.to_string() == "backtest" do
+      current_price = PriceTracker.current_price(instrument_id)
+      OrderHistory.place_order(instrument_id, {decision, current_price})
+    end
+
     # TODO:
     # - Place the order according to decision
     # - Save the order in the database
-
     decision
   end
 end

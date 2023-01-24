@@ -99,6 +99,19 @@ make run
 ```
 
 # Testing
+
+## Unit tests
 ``` sh
 make test
 ```
+
+## Backtesting
+This will run Hftx app against the data in the `priv/backtest_data.csv` file.
+``` sh
+make backtest
+```
+The result of the backtest can be obtained by running the following command in the above shell
+``` elixir
+Hftx.Backtesting.OrderHistory.statement(<instrument_name>)
+```
+There's also a [yfin.py](dev/yfin.py) python script that can be used to download 1m interval data for other instruments.
