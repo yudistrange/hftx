@@ -35,6 +35,8 @@ defmodule Hftx.Workers.Agent do
       events: []
     }
 
+    Logger.info("Starting Agent worker: #{name({strategy, instrument_id})}")
+
     :gen_statem.start_link({:via, :swarm, name({strategy, instrument_id})}, __MODULE__, data, [])
   end
 
@@ -54,6 +56,8 @@ defmodule Hftx.Workers.Agent do
         state,
         %{instrument_id: instrument_id, strategy: strategy, events: events} = data
       ) do
+    Logger.debug("Received aggregate event")
+    Logger.debug(inspect(event))
     active_agent_count = instrument_id |> group_name() |> Swarm.members() |> Enum.count()
     {next_state, updated_event_list} = apply(strategy, :evaluate, [state, [event | events]])
     :ok = DecisionMaker.observe(instrument_id, {next_state, strategy, active_agent_count})
