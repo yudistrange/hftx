@@ -4,6 +4,8 @@ defmodule Hftx.Workers.DataTransformer do
   """
   use GenServer
 
+  require Logger
+
   alias Hftx.Workers.Agent
   alias Hftx.Data.MarketEvent
 
@@ -15,6 +17,8 @@ defmodule Hftx.Workers.DataTransformer do
   @spec start_link(String.t(), {module}) ::
           :ignore | {:error, any} | {:ok, pid}
   def start_link(instrument_id, {aggregation_strategy}) do
+    Logger.info("Starting DataTransformer worker: #{name(instrument_id)}")
+
     GenServer.start_link(__MODULE__, {aggregation_strategy, instrument_id},
       name: {:via, :swarm, name(instrument_id) <> (aggregation_strategy |> Atom.to_string())}
     )
@@ -50,6 +54,8 @@ defmodule Hftx.Workers.DataTransformer do
           instrument_id: instrument_id
         } = state
       ) do
+    Logger.debug("Received market event:")
+    Logger.debug(inspect(market_event))
     aggregation_window = apply(aggregation_strategy, :aggregation_size, [])
 
     if Enum.count(market_events) + 1 >= aggregation_window do
@@ -62,6 +68,8 @@ defmodule Hftx.Workers.DataTransformer do
 
   defp aggregate({module, func, args}, instrument_id) do
     agg = apply(module, func, args)
+    Logger.debug("Brodcasting the aggregate to Agents:")
+    Logger.debug(inspect(agg))
     :ok = Agent.observe(instrument_id, agg)
   end
 end

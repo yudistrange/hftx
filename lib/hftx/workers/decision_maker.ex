@@ -6,6 +6,7 @@ defmodule Hftx.Workers.DecisionMaker do
   The actual [decision strategy](hftx/lib/hftx/strategies/decision_maker/decision_maker.ex) is injected at the time of startup
   """
   use GenServer
+  require Logger
   alias Hftx.Data.Agent.Suggestion, as: AgentSuggestion
 
   @spec name(String.t()) :: String.t()
@@ -21,6 +22,8 @@ defmodule Hftx.Workers.DecisionMaker do
   @spec start_link(String.t(), {module}) ::
           :ignore | {:error, any} | {:ok, pid}
   def start_link(instrument_id, {decision_strategy}) do
+    Logger.info("Starting Decision Maker: #{name(instrument_id)}")
+
     GenServer.start_link(__MODULE__, {decision_strategy, instrument_id},
       name: {:via, :swarm, name(instrument_id) <> (decision_strategy |> Atom.to_string())}
     )
@@ -53,6 +56,7 @@ defmodule Hftx.Workers.DecisionMaker do
           instrument_id: instrument_id
         } = state
       ) do
+    Logger.debug("Received suggestion: ")
     if Enum.count(past_suggestions) >= agent_count do
       decision = decide({strategy, :transform, [suggestion | past_suggestions]}, instrument_id)
       {:noreply, state |> Map.put(:past_actions, [decision | past_actions])}
