@@ -17,7 +17,9 @@ defmodule Hftx.Application do
       # Start the Endpoint (http/https)
       HftxWeb.Endpoint,
       # Start the Zerodha Supervisor
-      Hftx.Zerodha.Supervisor
+      Hftx.Zerodha.Supervisor,
+      # Start the workers Supervisor
+      Hftx.InstrumentsSupervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
