@@ -6,7 +6,7 @@ defmodule Hftx.Workers.DataTransformer do
 
   require Logger
 
-  alias Hftx.Workers.Agent
+  alias Hftx.Workers.Trader
   alias Hftx.Data.MarketEvent
 
   @spec name(String.t()) :: String.t()
@@ -68,8 +68,8 @@ defmodule Hftx.Workers.DataTransformer do
 
   defp aggregate({module, func, args}, instrument_id) do
     agg = apply(module, func, [args])
-    Logger.debug("Brodcasting the aggregate to Agents:")
+    Logger.debug("Brodcasting the aggregate to Traders:")
     Logger.debug(inspect(agg))
-    :ok = Agent.observe(instrument_id, agg)
+    :ok = Trader.observe(instrument_id, agg)
   end
 end

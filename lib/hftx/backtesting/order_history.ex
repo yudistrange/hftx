@@ -5,7 +5,7 @@ defmodule Hftx.Backtesting.OrderHistory do
   use Agent
 
   require Logger
-  alias Hftx.Data.Agent.Suggestion
+  alias Hftx.Data.Trader.Suggestion
 
   @spec name(String.t()) :: atom()
   def name(symbol) do

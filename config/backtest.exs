@@ -41,5 +41,5 @@ config :hftx, :instruments,
   bajfinance: [
     decision_maker_strategy: Hftx.Strategies.DecisionMaker.Naive,
     data_transformer_strategy: Hftx.Strategies.DataTransformer.CandleStick,
-    agent_strategies: [Hftx.Strategies.Agent.AlwaysLong]
+    trader_strategies: [Hftx.Strategies.Trader.AlwaysLong]
   ]

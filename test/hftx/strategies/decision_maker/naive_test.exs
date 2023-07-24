@@ -2,13 +2,13 @@ defmodule Hftx.Strategies.DecisionMaker.NaiveTest do
   use ExUnit.Case
 
   alias Hftx.Strategies.DecisionMaker.Naive
-  alias Hftx.Data.Agent.Suggestion, as: AgentSuggestion
+  alias Hftx.Data.Trader.Suggestion, as: TraderSuggestion
 
-  test "Decide based on first agent's suggestion" do
+  test "Decide based on first trader's suggestion" do
     assert Naive.decide([
-             {AgentStrat, AgentSuggestion.long()},
-             {AgentStrat, AgentSuggestion.hold()}
+             {TraderStrat, TraderSuggestion.long()},
+             {TraderStrat, TraderSuggestion.hold()}
            ]) ===
-             AgentSuggestion.long()
+             TraderSuggestion.long()
   end
 end

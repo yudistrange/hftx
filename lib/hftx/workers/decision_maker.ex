@@ -2,23 +2,23 @@ defmodule Hftx.Workers.DecisionMaker do
   @moduledoc """
   GenServer process that emulates a decision maker
 
-  This process will collat the agent suggestions and make a decision based on them.
+  This process will collat the trader suggestions and make a decision based on them.
   The actual [decision strategy](hftx/lib/hftx/strategies/decision_maker/decision_maker.ex) is injected at the time of startup
   """
   use GenServer
   require Logger
   alias Hftx.Backtesting.PriceTracker
   alias Hftx.Backtesting.OrderHistory
-  alias Hftx.Data.Agent.Suggestion, as: AgentSuggestion
+  alias Hftx.Data.Trader.Suggestion, as: TraderSuggestion
 
   @spec name(String.t()) :: String.t()
   def name(instrument_id), do: "DecisionMaker." <> instrument_id
 
-  @spec observe(String.t(), {module, AgentSuggestion.t(), non_neg_integer()}) :: :ok
-  def observe(instrument_id, {agent_strategy, agent_suggestion, agent_count}) do
+  @spec observe(String.t(), {module, TraderSuggestion.t(), non_neg_integer()}) :: :ok
+  def observe(instrument_id, {trader_strategy, trader_suggestion, trader_count}) do
     instrument_id
     |> name()
-    |> Swarm.publish({:observe, {agent_strategy, agent_suggestion}, agent_count})
+    |> Swarm.publish({:observe, {trader_strategy, trader_suggestion}, trader_count})
   end
 
   @spec start_link(String.t(), {module}) ::
@@ -50,7 +50,7 @@ defmodule Hftx.Workers.DecisionMaker do
 
   @impl true
   def handle_info(
-        {:observe, {_agent_strategy, _agent_suggestion} = suggestion, agent_count},
+        {:observe, {_trader_strategy, _trader_suggestion} = suggestion, trader_count},
         %{
           decision_strategy: strategy,
           past_suggestions: past_suggestions,
@@ -60,7 +60,7 @@ defmodule Hftx.Workers.DecisionMaker do
       ) do
     Logger.debug("Received suggestion")
 
-    if Enum.count(past_suggestions) >= agent_count do
+    if Enum.count(past_suggestions) >= trader_count do
       decision = decide({strategy, :decide, [suggestion | past_suggestions]}, instrument_id)
       {:noreply, state |> Map.put(:past_actions, [decision | past_actions])}
     else

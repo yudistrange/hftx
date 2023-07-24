@@ -1,6 +1,6 @@
-defmodule Hftx.Data.Agent.State do
+defmodule Hftx.Data.Trader.State do
   @moduledoc """
-  Struct to represent the state of an agent worker
+  Struct to represent the state of an trader worker
   """
   alias Hftx.Data.Aggregate
 

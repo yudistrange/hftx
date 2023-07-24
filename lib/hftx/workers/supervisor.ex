@@ -3,16 +3,16 @@ defmodule Hftx.Workers.Supervisor do
   Worker Supervisor module
 
   Starts and keeps track of the worker processes: 
-  - Agent
+  - Trader
   - DataTransformer
   - DecisionMaker
 
-  The reason for choosing `DynamicSupervisor` as the behaviour instead of `Supervisor` was to support dynamically adding more agents for an instrument. Not sure if this would ever be implemented.
+  The reason for choosing `DynamicSupervisor` as the behaviour instead of `Supervisor` was to support dynamically adding more traders for an instrument. Not sure if this would ever be implemented.
 
   Since the name of the supervisor is dependent on the instrument_id, there can only be one running instance of this supervisor per instrument_id
   """
   use Supervisor
-  alias Hftx.Workers.{DataTransformer, DecisionMaker, Agent}
+  alias Hftx.Workers.{DataTransformer, DecisionMaker, Trader}
 
   @spec name(String.t()) :: atom()
   def name(instrument_id) do
@@ -33,13 +33,13 @@ defmodule Hftx.Workers.Supervisor do
     instrument_config = instrument[instrument_id |> String.to_atom()]
     decision_maker_strategy = instrument_config[:decision_maker_strategy]
     data_transformer_strategy = instrument_config[:data_transformer_strategy]
-    agent_strategies = instrument_config[:agent_strategies]
+    trader_strategies = instrument_config[:trader_strategies]
 
     decision_maker_spec = get_decision_maker_spec(instrument_id, decision_maker_strategy)
     data_transformer_spec = get_data_transformer_spec(instrument_id, data_transformer_strategy)
-    agent_specs = get_agents_spec(instrument_id, agent_strategies)
+    trader_specs = get_traders_spec(instrument_id, trader_strategies)
 
-    [decision_maker_spec, data_transformer_spec | agent_specs]
+    [decision_maker_spec, data_transformer_spec | trader_specs]
   end
 
   defp get_data_transformer_spec(_, nil),
@@ -62,15 +62,15 @@ defmodule Hftx.Workers.Supervisor do
     }
   end
 
-  defp get_agents_spec(_, nil),
-    do: raise(ArgumentError, message: "Missing configuration for agent workers")
+  defp get_traders_spec(_, nil),
+    do: raise(ArgumentError, message: "Missing configuration for trader workers")
 
-  defp get_agents_spec(instrument_id, agent_strategies) do
-    Enum.map(agent_strategies, fn strat ->
-      id = "Agent." <> (strat |> Atom.to_string())
+  defp get_traders_spec(instrument_id, trader_strategies) do
+    Enum.map(trader_strategies, fn strat ->
+      id = "Trader." <> (strat |> Atom.to_string())
 
       # TODO: Get symbol value
-      %{id: id, start: {Agent, :start_link, [instrument_id, {strat, ""}]}}
+      %{id: id, start: {Trader, :start_link, [instrument_id, {strat, ""}]}}
     end)
   end
 end
