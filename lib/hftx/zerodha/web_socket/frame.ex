@@ -9,9 +9,9 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
 
   @type heartbeat :: :heartbeat
   @type user_event :: {:user_event, term()}
+  @type market_event :: {:market_event, [MarketEvent.t()]}
 
-  @spec parse(bitstring) ::
-          heartbeat | {:market_event, [MarketEvent.t()]} | user_event | {:error, :parse_error}
+  @spec parse(bitstring) :: heartbeat | market_event | user_event | {:error, :parse_error}
   def parse(frame) do
     {json_parse_status, json_parse_result} = Jason.decode(frame)
 
@@ -32,22 +32,21 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
     {:user_event, parsed_json_frame}
   end
 
-  @spec market_event(bitstring) :: {:market_event, [MarketEvent.t()]} | {:error, :parse_error}
-  defp market_event(binary_packet) do
-    message_size = bit_size(binary_packet) / 8
-    Logger.debug("Message size #{message_size}")
+  @spec market_event(binary) :: market_event | {:error, :parse_error}
+  defp market_event(frame) when is_binary(frame) do
+    <<quote_count::16, _rest>> = frame
+    Logger.info(quote_count)
 
-    if message_size == MarketEventParser.ltp_message_size() + MarketEventParser.num_frame_size() do
-      {:market_event, MarketEventParser.parse(binary_packet)}
-
-      case MarketEventParser.parse(binary_packet) do
-        {:ok, market_events} -> {:market_event, market_events}
-        {:error, :parse_error} -> {:error, :parse_error}
-      end
-    else
-      Logger.error("Expected frame size: #{MarketEventParser.ltp_message_size()}")
-      {:error, :parse_error}
+    case MarketEventParser.parse(frame) do
+      {:ok, market_events} -> {:market_event, market_events}
+      {:error, :parse_error} -> {:error, :parse_error}
     end
+  end
+
+  @spec market_event(bitstring) :: {:error, :parse_error}
+  defp market_event(event) do
+    Logger.error("Expected frame size: #{MarketEventParser.ltp_message_size()}")
+    {:error, :parse_error}
   end
 
   defmodule MarketEventParser do
