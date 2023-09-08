@@ -7,8 +7,9 @@ defmodule Hftx.Zerodha.WebSocket do
 
   alias Hftx.Zerodha.WebSocket.Frame
 
-  def start_link(url) do
-    WebSockex.start_link(url, __MODULE__, %{})
+  def start_link(access_token) do
+    ws_url = url(access_token)
+    WebSockex.start_link(ws_url, __MODULE__, %{})
   end
 
   def url(access_token) do
@@ -23,8 +24,18 @@ defmodule Hftx.Zerodha.WebSocket do
     {:ok, state |> Map.put(:status, :connected)}
   end
 
+  def handle_frame({:binary, msg}, state) do
+    Logger.debug("Received a binary msg: #{inspect(msg, limit: :infinity)}")
+    {:ok, state}
+  end
+
+  def handle_frame({:text, msg}, state) do
+    Logger.debug("Received a text msg: #{inspect(msg, limit: :infinity)}")
+    {:ok, state}
+  end
+
   def handle_frame({type, msg}, state) do
-    Logger.debug("Received Message - Type: #{inspect(type)} -- Message: #{inspect(msg)}")
+    Logger.warning("Received a message of unknown type: #{inspect(type)}\nMessage: #{msg}")
 
     case Frame.parse(msg) do
       :heartbeat -> nil
@@ -36,8 +47,13 @@ defmodule Hftx.Zerodha.WebSocket do
     {:ok, state}
   end
 
+  def handle_cast({:send, {type, msg} = frame}, state) do
+    Logger.debug("Sending Message - Type: #{inspect(type)} -- Message: #{inspect(msg)}")
+    {:reply, frame, state}
+  end
+
   def handle_disconnect(connection_status_map, state) do
-    Logger.warn("Websocket disconnect with reason: #{Map.get(connection_status_map, :reason)}")
+    Logger.warning("Websocket disconnect with reason: #{Map.get(connection_status_map, :reason)}")
     {:ok, state |> Map.put(:status, :disconnected)}
   end
 
