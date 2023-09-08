@@ -5,11 +5,14 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
   """
   require Logger
   alias Hftx.Data.MarketEvent
-  alias Hftx.Zerodha.WebSocket.Frame.MarketEventParser
+  alias Hftx.Zerodha.WebSocket.FrameParser
 
   @type heartbeat :: :heartbeat
   @type user_event :: {:user_event, term()}
   @type market_event :: {:market_event, [MarketEvent.t()]}
+
+  @number_messages_bits 16
+  @message_size_bits 16
 
   @spec parse(bitstring) :: heartbeat | market_event | user_event | {:error, :parse_error}
   def parse(frame) do
@@ -33,112 +36,44 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
   end
 
   @spec market_event(binary) :: market_event | {:error, :parse_error}
-  defp market_event(frame) when is_binary(frame) do
-    <<quote_count::16, _rest>> = frame
-    Logger.info(quote_count)
-
-    case MarketEventParser.parse(frame) do
-      {:ok, market_events} -> {:market_event, market_events}
-      {:error, :parse_error} -> {:error, :parse_error}
-    end
+  def market_event(<<num_msgs::@number_messages_bits, frame::binary>>) when is_binary(frame) do
+    {:market_event, recursive_market_event_parse(num_msgs, frame)}
   end
 
-  @spec market_event(bitstring) :: {:error, :parse_error}
-  defp market_event(event) do
-    Logger.error("Expected frame size: #{MarketEventParser.ltp_message_size()}")
+  def market_event(frame) when is_bitstring(frame) do
+    Logger.error("Expected frame size: #{inspect(frame)}")
     {:error, :parse_error}
   end
 
-  defmodule MarketEventParser do
-    @moduledoc """
-    Helper module which describes the decoding of Zerodha's binary message
-    All calculations here are based on bytes
+  @spec recursive_market_event_parse(integer, binary, [MarketEvent.t()]) :: [MarketEvent.t()]
+  defp recursive_market_event_parse(num_messages, binary_messages),
+    do: recursive_market_event_parse(num_messages, binary_messages, [])
 
-    WARNING: This module only supports `ltp` mode messages
-    """
-    require Logger
-    alias Hftx.Data.MarketEvent
+  defp recursive_market_event_parse(0, _, market_events),
+    do: market_events
 
-    @number_of_frame 2
-    @frame_size 2
-    @ltp_packet_size 8
-    @equity_quote_packet_size 44
-    @equity_full_packet_size 184
-    @index_quote_packet_size 28
-    @index_full_packet_size 32
+  defp recursive_market_event_parse(
+         num_messages,
+         <<first_msg_length::@message_size_bits, messages::binary>> = frame,
+         market_events
+       ) do
+    first_msg = Kernel.binary_part(frame, 0, div(@message_size_bits, 8) + first_msg_length)
 
-    def num_frame_size, do: @number_of_frame
-    def ltp_message_size, do: @ltp_packet_size + @frame_size
-    def equity_quote_packet_size, do: @equity_quote_packet_size + @frame_size
-    def equity_full_packet_size, do: @equity_full_packet_size + @frame_size
-    def index_quote_packet_size, do: @index_quote_packet_size + @frame_size
-    def index_full_packet_size, do: @index_full_packet_size + @frame_size
-
-    @spec parse(binary) :: {:ok, [MarketEvent.t()]} | {:error, :parse_error}
-    def parse(binary_packet) do
-      try do
-        num_packets = get_number_of_packets(binary_packet)
-
-        packets =
-          binary_part(
-            binary_packet,
-            @number_of_frame,
-            byte_size(binary_packet) - @number_of_frame
-          )
-
-        {:ok, parse_binary_packets(packets, num_packets - 1)}
-      rescue
-        _ -> {:error, :parse_error}
-      end
-    end
-
-    defp get_number_of_packets(binary_packet) do
-      binary_packet
-      |> binary_part(0, @number_of_frame)
-      |> :binary.decode_unsigned()
-    end
-
-    @spec parse_binary_packets(binary, non_neg_integer()) :: [MarketEvent.t()]
-    defp parse_binary_packets(binary_packet, num_packets) do
-      frame_size = binary_packet |> binary_part(0, @frame_size) |> :binary.decode_unsigned()
-      this_packet = binary_part(binary_packet, @frame_size, frame_size)
-
-      case num_packets do
-        0 ->
-          [parse_packet(this_packet, frame_size)]
-
-        _ ->
-          others =
-            binary_part(
-              binary_packet,
-              @frame_size + frame_size,
-              byte_size(binary_packet) - frame_size - @frame_size
-            )
-
-          [parse_packet(this_packet, frame_size), parse_binary_packets(others, num_packets - 1)]
-      end
-    end
-
-    @spec parse_packet(binary(), non_neg_integer()) :: MarketEvent.t()
-    defp parse_packet(packet, @ltp_packet_size) do
-      instrument_token = packet |> binary_part(0, 4) |> :binary.decode_unsigned()
-      ltp = packet |> binary_part(4, 4) |> :binary.decode_unsigned()
-
-      %MarketEvent{
-        timestamp: DateTime.utc_now() |> DateTime.to_unix(),
-        last_trade_price: ltp,
-        instrument_token: instrument_token,
-        # TODO: Fetch from the zerodha's intrument to symbol list
-        symbol: "bajfinance"
-      }
-    end
-
-    defp parse_packet(packet, size) do
-      Logger.error(
-        "Received packet with unsupported size: #{size}\nPacket: #{IO.inspect(packet)}"
+    rest =
+      Kernel.binary_part(
+        messages,
+        first_msg_length,
+        Kernel.byte_size(messages) - first_msg_length
       )
 
-      raise "Received Packet with unsupported size"
+    case FrameParser.parse(first_msg) do
+      {:ok, market_event} ->
+        recursive_market_event_parse(num_messages - 1, rest, [
+          market_event | market_events
+        ])
+
+      {:error, :parse_error} ->
+        recursive_market_event_parse(num_messages - 1, rest, market_events)
     end
   end
 end
