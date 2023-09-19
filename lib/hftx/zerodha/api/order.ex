@@ -48,8 +48,8 @@ defmodule Hftx.Zerodha.Api.Order do
     )
   end
 
-  @spec all(String.t()) :: {:ok, any} | {:error, any}
-  def all(access_token) do
+  @spec get(String.t()) :: {:ok, any} | {:error, any}
+  def get(access_token) do
     HTTPoison.get(
       @url <> "/orders",
       Utils.authorization_headers(@api_key, access_token)
