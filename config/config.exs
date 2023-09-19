@@ -28,8 +28,8 @@ config :phoenix, :json_library, Jason
 # Configures the zerodha endpoints, api keys, api secrets and urls
 config :hftx, :zerodha,
   api_url: System.get_env("KITE_API_URL") || "http://localhost:3000",
-  api_key: System.get_env("KITE_CLIENT_ID") || "api_key",
-  api_secret: System.get_env("GITHUB_CLIENT_ID") || "api_secret",
+  api_key: System.get_env("KITE_API_KEY") || "api_key",
+  api_secret: System.get_env("KITE_API_SECRET") || "api_secret",
   web_socket_url: System.get_env("KITE_WSS_URL") || "wss://localhost:3000"
 
 # Example instrument configuration
