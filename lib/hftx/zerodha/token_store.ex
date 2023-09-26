@@ -2,6 +2,8 @@ defmodule Hftx.Zerodha.TokenStore do
   @moduledoc """
   An elixir trader that will store the access_token received from the Zerodha callback API
   """
+  # TODO: Possible refactor into an ETS table
+  # Agent might not be performative enough(?)
   use Agent
 
   # TODO: Register the trader on registry

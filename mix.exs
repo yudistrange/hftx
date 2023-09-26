@@ -20,7 +20,7 @@ defmodule Hftx.MixProject do
   def application do
     [
       mod: {Hftx.Application, []},
-      extra_applications: [:logger, :runtime_tools, :os_mon]
+      extra_applications: [:logger, :runtime_tools, :os_mon, :observer, :wx]
     ]
   end
 
@@ -45,6 +45,7 @@ defmodule Hftx.MixProject do
       {:httpoison, "~> 1.8.0"},
       {:websockex, "~> 0.4.3"},
       {:swarm, "~> 3.4"},
+      {:mock, "~> 0.3.8", only: [:test]},
       {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
     ]

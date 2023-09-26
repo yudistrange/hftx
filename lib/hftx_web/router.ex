@@ -1,12 +1,17 @@
 defmodule HftxWeb.Router do
   use HftxWeb, :router
 
+  alias Controllers.ZerodhaController
+
   pipeline :api do
     plug :accepts, ["json"]
   end
 
   scope "/api", HftxWeb do
     pipe_through :api
+
+    get "/zerodha", ZerodhaController, :status
+    put "/zerodha/token", ZerodhaController, :update_token
   end
 
   # Enables LiveDashboard only for development
