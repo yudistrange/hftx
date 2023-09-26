@@ -2,11 +2,12 @@ defmodule Hftx.Zerodha do
   @moduledoc """
   Zerodha kite API client implementation.
   """
+  require Logger
   alias Hftx.Zerodha.Supervisor, as: ZerodhaSupervisor
   alias Hftx.Zerodha.TokenStore
   alias Hftx.Zerodha.WebSocket
 
-  def start_token_store(access_token) do
+  defp start_token_store(access_token) do
     spec = %{id: TokenStore, start: {TokenStore, :start_link, [access_token]}}
 
     case DynamicSupervisor.start_child(ZerodhaSupervisor, spec) do
@@ -23,9 +24,23 @@ defmodule Hftx.Zerodha do
     end
   end
 
-  def start_websocket(access_token) do
+  defp start_websocket(access_token) do
     websocket_url = WebSocket.url(access_token)
     spec = %{id: WebSocket, start: {WebSocket, :start_link, [websocket_url]}}
     DynamicSupervisor.start_child(ZerodhaSupervisor, spec)
+  end
+
+  def init(access_token) do
+    with {:ok, _token_store} <- start_token_store(access_token),
+         {:ok, _websocket} <- start_websocket(access_token) do
+      :ok
+    else
+      err ->
+        Logger.error(
+          "Failed to start zerodha processes on Token update with error: #{inspect(err)}"
+        )
+
+        :error
+    end
   end
 end
