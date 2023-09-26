@@ -30,6 +30,7 @@ defmodule Hftx.Zerodha do
     DynamicSupervisor.start_child(ZerodhaSupervisor, spec)
   end
 
+  @spec init(String.t()) :: :ok | :error
   def init(access_token) do
     with {:ok, _token_store} <- start_token_store(access_token),
          {:ok, _websocket} <- start_websocket(access_token) do
@@ -41,6 +42,31 @@ defmodule Hftx.Zerodha do
         )
 
         :error
+    end
+  end
+
+  @spec status() ::
+          {:ok, :not_initialized}
+          | {:ok, :running}
+          | {:error, :invalid_token}
+          | {:error, :unexpected_state}
+  def status() do
+    %{specs: spec, active: active, supervisors: _supervisors, workers: workers} =
+      DynamicSupervisor.count_children(ZerodhaSupervisor)
+
+    case {spec, active, workers} do
+      {0, 0, 0} ->
+        {:ok, :not_initialized}
+
+      {1, 1, 1} ->
+        {:error, :invalid_token}
+
+      {2, 2, 2} ->
+        {:ok, :running}
+
+      otherwise ->
+        Logger.error("Zerodha Supervisor has unexpected children: #{inspect(otherwise)}")
+        {:error, :unexpected_state}
     end
   end
 end
