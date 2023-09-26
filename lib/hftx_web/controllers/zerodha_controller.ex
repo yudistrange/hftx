@@ -23,8 +23,26 @@ defmodule HftxWeb.Controllers.ZerodhaController do
   end
 
   def status(conn, _) do
-    conn
-    |> put_status(:ok)
-    |> json(%{status: "healthy"})
+    case Zerodha.status() do
+      {:ok, :not_initialized} ->
+        conn
+        |> put_status(:ok)
+        |> json(%{data: %{message: "Not initialized"}})
+
+      {:ok, :running} ->
+        conn
+        |> put_status(:ok)
+        |> json(%{data: %{message: "Healthy"}})
+
+      {:error, :invalid_token} ->
+        conn
+        |> put_status(:failed_dependency)
+        |> json(%{error: %{details: "Invalid token, unable to run websocket connection"}})
+
+      {:error, :unexpected_state} ->
+        conn
+        |> put_status(:internal_server_error)
+        |> json(%{error: %{details: "Zerodha process tree in unexpected state"}})
+    end
   end
 end

@@ -2,12 +2,7 @@ defmodule HftxWeb.Controllers.ZerodhaControllerTest do
   use HftxWeb.ConnCase, async: true
   import Mock
 
-  describe "Zerodha Related APIs" do
-    test "Sends the status", %{conn: conn} do
-      conn = get(conn, "/api/zerodha")
-      assert json_response(conn, 200) == %{"status" => "healthy"}
-    end
-
+  describe "Zerodha Token Update APIs" do
     test "Can't update the token store with bad token", %{conn: conn} do
       conn = put(conn, "/api/zerodha/token", %{"access_token" => "blah"})
 
