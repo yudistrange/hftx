@@ -31,7 +31,7 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser do
         EquityQuote.parse(data)
 
       @full_equity_size ->
-        Logger.error("Got Equity Full message")
+        Logger.info("Got Equity Full message")
         EquityFull.parse(data)
 
       @quote_index_size ->
