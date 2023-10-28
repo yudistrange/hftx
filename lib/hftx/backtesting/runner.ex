@@ -5,7 +5,7 @@ defmodule Hftx.Backtesting.Runner do
   require Logger
   alias Hftx.Backtesting.PriceTracker
   alias Hftx.Workers.DataTransformer
-  alias Hftx.Data.MarketEvent
+  alias Hftx.Data.EquityEvent
 
   def run({symbol, instrument_token}) do
     Logger.info("Starting the backtester process")
@@ -19,7 +19,7 @@ defmodule Hftx.Backtesting.Runner do
     |> Stream.map(fn tokens ->
       {ltp, _} = Enum.at(tokens, 1) |> Float.parse()
 
-      %MarketEvent{
+      %EquityEvent{
         timestamp: DateTime.utc_now() |> DateTime.to_unix(),
         last_trade_price: ltp,
         instrument_token: instrument_token,

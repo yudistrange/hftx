@@ -2,12 +2,12 @@ defmodule Hftx.Strategies.DataTransformer.CandleStickTest do
   use ExUnit.Case
 
   alias Hftx.Strategies.DataTransformer.CandleStick, as: CandleStickTransformer
-  alias Hftx.Data.MarketEvent
+  alias Hftx.Data.EquityEvent
   alias Hftx.Data.Aggregate.CandleStick
 
   test "Create CandleStick Aggregate from a list of MarketEvent Data" do
     market_events = [
-      %MarketEvent{
+      %EquityEvent{
         timestamp: DateTime.utc_now(),
         symbol: "tsla",
         instrument_token: 1,

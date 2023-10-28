@@ -3,12 +3,12 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityFull do
   Handles parsing equity message of type `Full`
   """
   require Logger
-  alias Hftx.Data.MarketEvent
+  alias Hftx.Data.EquityEvent
 
   @size 184
   def size(), do: @size
 
-  @spec parse(binary) :: {:ok, MarketEvent.t()} | {:error, :parse_error}
+  @spec parse(binary) :: {:ok, EquityEvent.t()} | {:error, :parse_error}
   def parse(
         <<instrument_token::32, ltp::32, last_trade_volume::32, average_price::32,
           total_trade_volume::32, total_buy::32, total_sell::32, open_price::32, high_price::32,
@@ -20,7 +20,7 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityFull do
     order_book = parse_market_depth(market_depth)
 
     {:ok,
-     %MarketEvent{
+     %EquityEvent{
        timestamp: DateTime.utc_now(),
        # TODO: Fetch symbol from the instruments table
        symbol: "",
@@ -49,15 +49,15 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityFull do
     {:error, :parse_error}
   end
 
-  @spec parse_market_depth(bitstring()) :: MarketEvent.OrderBook.t() | nil
+  @spec parse_market_depth(bitstring()) :: EquityEvent.OrderBook.t() | nil
   defp parse_market_depth(market_depth) do
     entries =
       for <<(<<quantity::32, price::32, orders::16, _padding::16>> <- market_depth)>> do
-        %MarketEvent.OrderBook.OrderTuple{quantity: quantity, price: price, orders: orders}
+        %EquityEvent.OrderBook.OrderTuple{quantity: quantity, price: price, orders: orders}
       end
 
     {bids, offers} = Enum.split(entries, 5)
 
-    %MarketEvent.OrderBook{bid: bids, offer: offers}
+    %EquityEvent.OrderBook{bid: bids, offer: offers}
   end
 end

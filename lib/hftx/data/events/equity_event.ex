@@ -1,4 +1,4 @@
-defmodule Hftx.Data.MarketEvent do
+defmodule Hftx.Data.EquityEvent do
   @enforce_keys [:timestamp, :last_trade_price, :symbol, :instrument_token]
   defstruct [
     :timestamp,
@@ -24,7 +24,7 @@ defmodule Hftx.Data.MarketEvent do
   ]
 
   @type t :: %__MODULE__{
-          timestamp: integer(),
+          timestamp: DateTime.t(),
           symbol: String.t(),
           last_trade_price: Float,
           instrument_token: non_neg_integer(),

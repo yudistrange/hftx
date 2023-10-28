@@ -2,7 +2,7 @@ defmodule Hftx.Zerodha.WebSocket.FrameTest do
   use ExUnit.Case
 
   alias Hftx.Zerodha.WebSocket.Frame
-  alias Hftx.Data.MarketEvent
+  alias Hftx.Data.EquityEvent
 
   @quote_frame <<0, 1, 0, 44, 0, 6, 58, 1, 0, 2, 32, 141, 0, 0, 0, 97, 0, 2, 29, 80, 0, 56, 101,
                  31, 0, 3, 125, 117, 0, 4, 106, 217, 0, 2, 30, 38, 0, 2, 32, 236, 0, 2, 25, 228,
@@ -57,7 +57,7 @@ defmodule Hftx.Zerodha.WebSocket.FrameTest do
     frozen_ts = DateTime.utc_now()
     {:market_event, [market_event]} = Frame.parse(@full_frame)
 
-    assert market_event |> Map.put(:timestamp, frozen_ts) === %MarketEvent{
+    assert market_event |> Map.put(:timestamp, frozen_ts) === %EquityEvent{
              average_price: 138_583,
              close_price: 137_835,
              high_price: 139_500,
@@ -77,24 +77,24 @@ defmodule Hftx.Zerodha.WebSocket.FrameTest do
              open_interest_day_high: 0,
              open_interest_day_low: 0,
              exchange_timestamp: 1_691_414_161,
-             order_book: %Hftx.Data.MarketEvent.OrderBook{
+             order_book: %Hftx.Data.EquityEvent.OrderBook{
                bid: [
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0}
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0}
                ],
                offer: [
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{
                    quantity: 1240,
                    orders: 28,
                    price: 139_300
                  },
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0}
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0}
                ]
              }
            }

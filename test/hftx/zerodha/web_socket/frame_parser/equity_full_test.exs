@@ -2,7 +2,7 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityFulltest do
   use ExUnit.Case
 
   alias Hftx.Zerodha.WebSocket.FrameParser.EquityFull
-  alias Hftx.Data.MarketEvent
+  alias Hftx.Data.EquityEvent
 
   test "Parse an Equity LTP message of size 64 bytes" do
     full_msg =
@@ -17,7 +17,7 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityFulltest do
     frozen_ts = DateTime.utc_now()
     {:ok, market_event} = EquityFull.parse(full_msg)
 
-    assert market_event |> Map.put(:timestamp, frozen_ts) === %MarketEvent{
+    assert market_event |> Map.put(:timestamp, frozen_ts) === %EquityEvent{
              average_price: 138_583,
              close_price: 137_835,
              high_price: 139_500,
@@ -37,24 +37,24 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityFulltest do
              open_interest_day_high: 0,
              open_interest_day_low: 0,
              exchange_timestamp: 1_691_414_161,
-             order_book: %Hftx.Data.MarketEvent.OrderBook{
+             order_book: %Hftx.Data.EquityEvent.OrderBook{
                bid: [
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0}
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0}
                ],
                offer: [
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{
                    quantity: 1240,
                    orders: 28,
                    price: 139_300
                  },
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
-                 %Hftx.Data.MarketEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0}
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0},
+                 %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0}
                ]
              }
            }

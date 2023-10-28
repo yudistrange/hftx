@@ -3,15 +3,15 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityLtp do
   Handles parsing index and equity message of type `LTP`
   """
   require Logger
-  alias Hftx.Data.MarketEvent
+  alias Hftx.Data.EquityEvent
 
   @size 8
   def size(), do: @size
 
-  @spec parse(binary) :: {:ok, MarketEvent.t()} | {:error, :parse_error}
+  @spec parse(binary) :: {:ok, EquityEvent.t()} | {:error, :parse_error}
   def parse(<<instrument_token::32, ltp::32>>) do
     {:ok,
-     %MarketEvent{
+     %EquityEvent{
        timestamp: DateTime.utc_now(),
        # TODO: Fetch the symbol for the instrument_token
        symbol: "",
