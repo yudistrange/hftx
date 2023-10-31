@@ -37,7 +37,7 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
 
   @spec market_event(binary) :: market_event | {:error, :parse_error}
   def market_event(<<num_msgs::@number_messages_bits, frame::binary>>) when is_binary(frame) do
-    {:market_event, recursive_market_event_parse(num_msgs, frame)}
+    {:market_event, recursive_market_event_parse(num_msgs, frame, [])}
   end
 
   def market_event(frame) when is_bitstring(frame) do
@@ -46,9 +46,6 @@ defmodule Hftx.Zerodha.WebSocket.Frame do
   end
 
   @spec recursive_market_event_parse(integer, binary, [MarketEvent.t()]) :: [MarketEvent.t()]
-  defp recursive_market_event_parse(num_messages, binary_messages),
-    do: recursive_market_event_parse(num_messages, binary_messages, [])
-
   defp recursive_market_event_parse(0, _, market_events),
     do: market_events
 

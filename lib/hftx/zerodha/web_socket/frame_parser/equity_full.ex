@@ -16,7 +16,6 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityFull do
           open_interest_day_high::32, open_interest_day_low::32, exchange_timestamp::32,
           market_depth::binary>>
       ) do
-    Logger.error(~c"Market Depth Binary size #{byte_size(market_depth)}")
     order_book = parse_market_depth(market_depth)
 
     {:ok,
@@ -45,7 +44,7 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityFull do
   end
 
   def parse(_msg) do
-    Logger.error("Equity Full message parsing is not implemented")
+    Logger.error("Equity Full message could not be parsed")
     {:error, :parse_error}
   end
 

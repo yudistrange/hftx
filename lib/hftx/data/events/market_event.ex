@@ -1,5 +1,8 @@
 defmodule Hftx.Data.MarketEvent do
   @moduledoc false
 
-  @type t :: Hftx.Data.EquityEvent.t() | Hftx.Data.IndexEvent.t()
+  alias Hftx.Data.EquityEvent
+  alias Hftx.Data.IndexEvent
+
+  @type t :: EquityEvent.t() | IndexEvent.t()
 end
