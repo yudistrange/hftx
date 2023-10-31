@@ -4,7 +4,7 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityLtpTest do
   alias Hftx.Zerodha.WebSocket.FrameParser.EquityLtp
   alias Hftx.Data.EquityEvent
 
-  test "Parse an Equity LTP message of size 64 bytes" do
+  test "Parse an Equity LTP message of size 8 bytes" do
     ltp_msg = <<0, 13, 128, 1, 0, 0, 238, 22>>
     frozen_ts = DateTime.utc_now()
     {:ok, market_event} = EquityLtp.parse(ltp_msg)

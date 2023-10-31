@@ -4,7 +4,7 @@ defmodule Hftx.Zerodha.WebSocket.FrameParser.EquityFulltest do
   alias Hftx.Zerodha.WebSocket.FrameParser.EquityFull
   alias Hftx.Data.EquityEvent
 
-  test "Parse an Equity LTP message of size 64 bytes" do
+  test "Parse an Equity LTP message of size 44 bytes" do
     full_msg =
       <<0, 6, 58, 1, 0, 2, 32, 36, 0, 0, 0, 5, 0, 2, 29, 87, 0, 56, 230, 197, 0, 0, 0, 0, 0, 0, 4,
         216, 0, 2, 30, 38, 0, 2, 32, 236, 0, 2, 25, 228, 0, 2, 26, 107, 100, 208, 199, 122, 0, 0,
