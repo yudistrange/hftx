@@ -3,12 +3,13 @@ defmodule Hftx.Zerodha.WebSocket.FrameTest do
 
   alias Hftx.Zerodha.WebSocket.Frame
   alias Hftx.Data.EquityEvent
+  alias Hftx.Data.IndexEvent
+
+  @ltp_frame <<0, 1, 0, 8, 0, 13, 128, 1, 0, 0, 238, 22>>
 
   @quote_frame <<0, 1, 0, 44, 0, 6, 58, 1, 0, 2, 32, 141, 0, 0, 0, 97, 0, 2, 29, 80, 0, 56, 101,
                  31, 0, 3, 125, 117, 0, 4, 106, 217, 0, 2, 30, 38, 0, 2, 32, 236, 0, 2, 25, 228,
                  0, 2, 26, 107>>
-
-  @ltp_frame <<0, 1, 0, 8, 0, 13, 128, 1, 0, 0, 238, 22>>
 
   @full_frame <<0, 1, 0, 184, 0, 6, 58, 1, 0, 2, 32, 36, 0, 0, 0, 5, 0, 2, 29, 87, 0, 56, 230,
                 197, 0, 0, 0, 0, 0, 0, 4, 216, 0, 2, 30, 38, 0, 2, 32, 236, 0, 2, 25, 228, 0, 2,
@@ -18,6 +19,12 @@ defmodule Hftx.Zerodha.WebSocket.FrameTest do
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 216, 0, 2, 32, 36, 0, 28, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>>
+
+  @index_quote_frame <<0, 1, 0, 28, 0, 6, 58, 1, 0, 2, 32, 141, 0, 2, 33, 141, 0, 2, 29, 80, 0, 2,
+                       30, 31, 0, 2, 31, 117, 0, 0, 106, 217>>
+
+  @index_full_frame <<0, 1, 0, 32, 0, 6, 58, 1, 0, 2, 32, 141, 0, 2, 33, 141, 0, 2, 29, 80, 0, 2,
+                      30, 31, 0, 2, 31, 117, 0, 0, 106, 217, 1, 0, 106, 5>>
 
   test "Parse single byte frame as hearbeat" do
     msg = <<1::8>>
@@ -97,6 +104,41 @@ defmodule Hftx.Zerodha.WebSocket.FrameTest do
                  %Hftx.Data.EquityEvent.OrderBook.OrderTuple{quantity: 0, orders: 0, price: 0}
                ]
              }
+           }
+  end
+
+  test "Parse Index Quote message as market_event" do
+    frozen_ts = DateTime.utc_now()
+    {:market_event, [market_event]} = Frame.parse(@index_quote_frame)
+
+    assert market_event |> Map.put(:timestamp, frozen_ts) === %IndexEvent{
+             instrument_token: 408_065,
+             last_trade_price: 139_405,
+             high_price: 139_661,
+             low_price: 138_576,
+             open_price: 138_783,
+             close_price: 139_125,
+             price_change: 27_353,
+             symbol: "",
+             timestamp: frozen_ts
+           }
+  end
+
+  test "Parse Index Full message as market_event" do
+    frozen_ts = DateTime.utc_now()
+    {:market_event, [market_event]} = Frame.parse(@index_full_frame)
+
+    assert market_event |> Map.put(:timestamp, frozen_ts) === %IndexEvent{
+             instrument_token: 408_065,
+             last_trade_price: 139_405,
+             high_price: 139_661,
+             low_price: 138_576,
+             open_price: 138_783,
+             close_price: 139_125,
+             price_change: 27_353,
+             exchange_timestamp: 16_804_357,
+             symbol: "",
+             timestamp: frozen_ts
            }
   end
 end
