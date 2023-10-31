@@ -141,4 +141,60 @@ defmodule Hftx.Zerodha.WebSocket.FrameTest do
              timestamp: frozen_ts
            }
   end
+
+  test "Parse multiple LTP messages" do
+    ltp_frames = <<0, 2, 0, 8, 0, 13, 128, 1, 0, 0, 238, 22, 0, 8, 0, 13, 128, 1, 0, 0, 238, 22>>
+    frozen_ts = DateTime.utc_now()
+    instrument_token = 884_737
+    ltp = 60_950
+
+    {:market_event, market_events} = Frame.parse(ltp_frames)
+    assert Enum.count(market_events) == 2
+
+    assert Enum.at(market_events, 0) |> Map.put(:timestamp, frozen_ts) == %EquityEvent{
+             timestamp: frozen_ts,
+             symbol: "",
+             instrument_token: instrument_token,
+             last_trade_price: ltp
+           }
+
+    assert Enum.at(market_events, 1) |> Map.put(:timestamp, frozen_ts) == %EquityEvent{
+             timestamp: frozen_ts,
+             symbol: "",
+             instrument_token: instrument_token,
+             last_trade_price: ltp
+           }
+  end
+
+  test "Parse equity and index messages from same frame" do
+    mixed_frames =
+      <<0, 2, 0, 8, 0, 13, 128, 1, 0, 0, 238, 22, 0, 28, 0, 6, 58, 1, 0, 2, 32, 141, 0, 2, 33,
+        141, 0, 2, 29, 80, 0, 2, 30, 31, 0, 2, 31, 117, 0, 0, 106, 217>>
+
+    frozen_ts = DateTime.utc_now()
+    instrument_token = 884_737
+    ltp = 60_950
+
+    {:market_event, market_events} = Frame.parse(mixed_frames)
+    assert Enum.count(market_events) == 2
+
+    assert Enum.at(market_events, 0) |> Map.put(:timestamp, frozen_ts) === %IndexEvent{
+             instrument_token: 408_065,
+             last_trade_price: 139_405,
+             high_price: 139_661,
+             low_price: 138_576,
+             open_price: 138_783,
+             close_price: 139_125,
+             price_change: 27_353,
+             symbol: "",
+             timestamp: frozen_ts
+           }
+
+    assert Enum.at(market_events, 1) |> Map.put(:timestamp, frozen_ts) == %EquityEvent{
+             timestamp: frozen_ts,
+             symbol: "",
+             instrument_token: instrument_token,
+             last_trade_price: ltp
+           }
+  end
 end
