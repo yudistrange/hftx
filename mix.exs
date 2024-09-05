@@ -33,21 +33,22 @@ defmodule Hftx.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.6.15"},
-      {:phoenix_ecto, "~> 4.4"},
-      {:ecto_sql, "~> 3.6"},
+      {:phoenix, "~> 1.7"},
+      {:phoenix_ecto, "~> 4.6"},
+      {:phoenix_view, "~> 2.0"},
+      {:ecto_sql, "~> 3.12"},
       {:postgrex, ">= 0.0.0"},
-      {:phoenix_live_dashboard, "~> 0.6"},
-      {:telemetry_metrics, "~> 0.6"},
-      {:telemetry_poller, "~> 1.0"},
-      {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"},
-      {:httpoison, "~> 1.8.0"},
+      {:phoenix_live_dashboard, "~> 0.8"},
+      {:telemetry_metrics, "~> 1.0"},
+      {:telemetry_poller, "~> 1.1"},
+      {:jason, "~> 1.4"},
+      {:plug_cowboy, "~> 2.7"},
+      {:httpoison, "~> 2.2"},
       {:websockex, "~> 0.4.3"},
       {:swarm, "~> 3.4"},
       {:mock, "~> 0.3.8", only: [:test]},
-      {:dialyxir, "~> 1.0", only: [:dev], runtime: false},
-      {:credo, "~> 1.6", only: [:dev, :test], runtime: false}
+      {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false}
     ]
   end
 
