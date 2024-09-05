@@ -6,6 +6,14 @@ run:
 
 test:
 	docker compose -f dev/docker-test-compose.yaml up -d
+	@echo "Waiting for Postgres to be ready..."
+
+	@until docker exec -it hftx-test-db pg_isready -U postgres -d hftx_test -h localhost; do \
+		echo "Waiting for database..."; \
+		sleep 2; \
+		done
+	@echo "Postgres is up and running!"
+
 	mix test
 	docker compose -f dev/docker-test-compose.yaml down
 
